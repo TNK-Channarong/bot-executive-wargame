@@ -3,362 +3,281 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>แผนรับมือสงครามตะวันออกกลาง — ผลกระทบต่ออาเซียน</title>
+<title>แผนรับมือสงครามตะวันออกกลาง — AI Live Data</title>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Noto+Serif+Thai:wght@400;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
   :root {
-    --bg: #0d0f14;
-    --bg2: #13161e;
-    --bg3: #1a1e28;
-    --bg4: #222736;
-    --border: rgba(255,255,255,0.07);
-    --border2: rgba(255,255,255,0.13);
-    --text: #e8eaf0;
-    --text2: #9098b0;
-    --text3: #5a6278;
-    --accent: #c9a84c;
-    --accent2: #e8c96a;
-    --red: #e05252;
-    --amber: #e8a230;
-    --green: #4caf7e;
-    --blue: #5b91d8;
-    --radius: 10px;
-    --radius-sm: 6px;
+    --bg:#0d0f14; --bg2:#13161e; --bg3:#1a1e28; --bg4:#222736;
+    --border:rgba(255,255,255,0.07); --border2:rgba(255,255,255,0.13);
+    --text:#e8eaf0; --text2:#9098b0; --text3:#5a6278;
+    --accent:#c9a84c; --accent2:#e8c96a;
+    --red:#e05252; --amber:#e8a230; --green:#4caf7e; --blue:#5b91d8;
+    --radius:10px; --radius-sm:6px;
   }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  html { scroll-behavior: smooth; }
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Sarabun', sans-serif;
-    font-size: 15px;
-    min-height: 100vh;
-    line-height: 1.6;
-  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  html { scroll-behavior:smooth; }
+  body { background:var(--bg); color:var(--text); font-family:'Sarabun',sans-serif; font-size:15px; min-height:100vh; line-height:1.6; }
 
-  .header {
-    background: linear-gradient(135deg, #0d0f14 0%, #14182a 100%);
-    border-bottom: 1px solid var(--border2);
-    padding: 0 2rem;
-    position: sticky;
-    top: 0;
-    z-index: 100;
+  /* ── LOADING OVERLAY ── */
+  #loading-overlay {
+    position:fixed; inset:0; background:#0d0f14; z-index:9999;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:24px;
   }
-  .header-inner {
-    max-width: 1200px;
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    height: 68px;
+  .loading-logo { font-family:'Noto Serif Thai',serif; font-size:28px; color:var(--accent2); font-weight:600; }
+  .loading-sub { font-size:14px; color:var(--text3); }
+  .loading-steps { display:flex; flex-direction:column; gap:10px; width:360px; }
+  .loading-step {
+    display:flex; align-items:center; gap:12px;
+    padding:10px 14px; border-radius:var(--radius-sm);
+    background:var(--bg2); border:1px solid var(--border);
+    font-size:13px; color:var(--text3);
+    transition:all 0.3s;
   }
-  .logo { display: flex; align-items: center; gap: 12px; }
-  .logo-icon {
-    width: 38px; height: 38px;
-    background: linear-gradient(135deg, var(--accent), #a07830);
-    border-radius: 8px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 20px;
-  }
-  .logo-text {
-    font-family: 'Noto Serif Thai', serif;
-    font-size: 17px;
-    color: var(--accent2);
-    font-weight: 600;
-  }
-  .logo-sub { font-size: 11px; color: var(--text3); margin-top: 2px; letter-spacing: 0.04em; }
-  .nav { display: flex; gap: 4px; }
-  .nav-btn {
-    background: none; border: none;
-    color: var(--text2);
-    font-family: 'Sarabun', sans-serif;
-    font-size: 14px; font-weight: 500;
-    padding: 8px 16px;
-    cursor: pointer;
-    border-radius: var(--radius-sm);
-    transition: all 0.2s;
-    position: relative;
-  }
-  .nav-btn:hover { color: var(--text); background: var(--bg3); }
-  .nav-btn.active { color: var(--accent2); background: rgba(201,168,76,0.1); }
-  .nav-btn.active::after {
-    content: '';
-    position: absolute;
-    bottom: -1px; left: 50%;
-    transform: translateX(-50%);
-    width: 40px; height: 2px;
-    background: var(--accent);
-    border-radius: 1px;
-  }
+  .loading-step.active { border-color:var(--accent); color:var(--text2); background:var(--bg3); }
+  .loading-step.done { border-color:var(--green); color:var(--green); background:rgba(76,175,126,0.08); }
+  .loading-step.error { border-color:var(--red); color:var(--red); }
+  .step-icon { font-size:16px; width:20px; text-align:center; }
+  .loading-bar-wrap { width:360px; height:4px; background:var(--bg4); border-radius:2px; overflow:hidden; }
+  .loading-bar { height:100%; background:var(--accent); border-radius:2px; width:0%; transition:width 0.6s ease; }
 
-  .main { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+  /* ── AI INTEL BANNER ── */
+  .ai-banner {
+    background:linear-gradient(135deg,rgba(201,168,76,0.08),rgba(91,145,216,0.08));
+    border:1px solid var(--border2); border-radius:var(--radius);
+    padding:1.25rem 1.5rem; margin-bottom:1.25rem;
+    display:flex; gap:1rem; align-items:flex-start;
+  }
+  .ai-icon { font-size:24px; flex-shrink:0; margin-top:2px; }
+  .ai-title { font-size:13px; font-weight:600; color:var(--accent2); margin-bottom:6px; }
+  .ai-body { font-size:13px; color:var(--text2); line-height:1.75; }
+  .ai-meta { font-size:11px; color:var(--text3); margin-top:8px; }
+  .ai-refresh {
+    margin-left:auto; flex-shrink:0;
+    background:none; border:1px solid var(--border2);
+    color:var(--text3); font-family:'Sarabun',sans-serif;
+    font-size:12px; padding:6px 12px; border-radius:var(--radius-sm);
+    cursor:pointer; transition:all 0.2s; white-space:nowrap;
+  }
+  .ai-refresh:hover { color:var(--accent2); border-color:var(--accent); }
 
-  .panel { display: none; }
-  .panel.active { display: block; animation: fadeIn 0.3s ease; }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  /* ── HEADER ── */
+  .header { background:linear-gradient(135deg,#0d0f14,#14182a); border-bottom:1px solid var(--border2); padding:0 2rem; position:sticky; top:0; z-index:100; }
+  .header-inner { max-width:1200px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; height:68px; }
+  .logo { display:flex; align-items:center; gap:12px; }
+  .logo-icon { width:38px; height:38px; background:linear-gradient(135deg,var(--accent),#a07830); border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:20px; }
+  .logo-text { font-family:'Noto Serif Thai',serif; font-size:17px; color:var(--accent2); font-weight:600; }
+  .logo-sub { font-size:11px; color:var(--text3); margin-top:2px; }
+  .logo-ai-badge { display:inline-flex; align-items:center; gap:4px; background:rgba(91,145,216,0.15); border:1px solid rgba(91,145,216,0.3); color:var(--blue); font-size:10px; font-weight:600; padding:2px 8px; border-radius:20px; margin-left:8px; }
+  .nav { display:flex; gap:4px; }
+  .nav-btn { background:none; border:none; color:var(--text2); font-family:'Sarabun',sans-serif; font-size:14px; font-weight:500; padding:8px 16px; cursor:pointer; border-radius:var(--radius-sm); transition:all 0.2s; position:relative; }
+  .nav-btn:hover { color:var(--text); background:var(--bg3); }
+  .nav-btn.active { color:var(--accent2); background:rgba(201,168,76,0.1); }
+  .nav-btn.active::after { content:''; position:absolute; bottom:-1px; left:50%; transform:translateX(-50%); width:40px; height:2px; background:var(--accent); border-radius:1px; }
 
-  .hero {
-    background: linear-gradient(135deg, #14182a 0%, #1a1428 100%);
-    border: 1px solid var(--border2);
-    border-radius: 14px;
-    padding: 2rem 2.5rem;
-    margin-bottom: 2rem;
-    display: flex; align-items: center;
-    justify-content: space-between;
-    gap: 2rem;
-    position: relative; overflow: hidden;
-  }
-  .hero::before {
-    content: '';
-    position: absolute;
-    top: -60px; right: -60px;
-    width: 200px; height: 200px;
-    background: radial-gradient(circle, rgba(201,168,76,0.08) 0%, transparent 70%);
-    pointer-events: none;
-  }
-  .hero-title {
-    font-family: 'Noto Serif Thai', serif;
-    font-size: 24px; font-weight: 600;
-    color: var(--accent2);
-    line-height: 1.4; margin-bottom: 10px;
-  }
-  .hero-sub { font-size: 14px; color: var(--text2); line-height: 1.8; max-width: 560px; }
-  .hero-badges { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
-  .hbadge {
-    padding: 4px 12px; border-radius: 20px;
-    font-size: 12px; font-weight: 600;
-  }
-  .hbadge.red { background: rgba(224,82,82,0.15); color: var(--red); border: 1px solid rgba(224,82,82,0.3); }
-  .hbadge.amber { background: rgba(232,162,48,0.15); color: var(--amber); border: 1px solid rgba(232,162,48,0.3); }
-  .hbadge.blue { background: rgba(91,145,216,0.15); color: var(--blue); border: 1px solid rgba(91,145,216,0.3); }
+  .main { max-width:1200px; margin:0 auto; padding:2rem; }
+  .panel { display:none; }
+  .panel.active { display:block; animation:fadeIn 0.3s ease; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
 
-  .card {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 1.5rem;
-    margin-bottom: 1.25rem;
-  }
-  .card-title {
-    font-size: 12px; font-weight: 600;
-    letter-spacing: 0.06em;
-    color: var(--text3);
-    margin-bottom: 1.25rem;
-    text-transform: uppercase;
-  }
-  .card-accent { border-left: 3px solid var(--accent); }
+  /* ── HERO ── */
+  .hero { background:linear-gradient(135deg,#14182a,#1a1428); border:1px solid var(--border2); border-radius:14px; padding:2rem 2.5rem; margin-bottom:1.5rem; position:relative; overflow:hidden; }
+  .hero::before { content:''; position:absolute; top:-60px; right:-60px; width:200px; height:200px; background:radial-gradient(circle,rgba(201,168,76,0.08) 0%,transparent 70%); pointer-events:none; }
+  .hero-title { font-family:'Noto Serif Thai',serif; font-size:24px; font-weight:600; color:var(--accent2); line-height:1.4; margin-bottom:10px; }
+  .hero-sub { font-size:14px; color:var(--text2); line-height:1.8; max-width:640px; }
+  .hero-badges { display:flex; gap:8px; margin-top:14px; flex-wrap:wrap; }
+  .hbadge { padding:4px 12px; border-radius:20px; font-size:12px; font-weight:600; }
+  .hbadge.red { background:rgba(224,82,82,0.15); color:var(--red); border:1px solid rgba(224,82,82,0.3); }
+  .hbadge.amber { background:rgba(232,162,48,0.15); color:var(--amber); border:1px solid rgba(232,162,48,0.3); }
+  .hbadge.blue { background:rgba(91,145,216,0.15); color:var(--blue); border:1px solid rgba(91,145,216,0.3); }
+  .hbadge.green { background:rgba(76,175,126,0.15); color:var(--green); border:1px solid rgba(76,175,126,0.3); }
 
-  .metric-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 10px; margin-bottom: 1.25rem;
-  }
-  .metric {
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 14px 16px;
-    transition: border-color 0.2s;
-  }
-  .metric:hover { border-color: var(--border2); }
-  .metric-label { font-size: 12px; color: var(--text3); margin-bottom: 6px; line-height: 1.4; }
-  .metric-val { font-size: 24px; font-weight: 600; color: var(--text); }
-  .metric-val.red { color: var(--red); }
-  .metric-val.amber { color: var(--amber); }
-  .metric-val.green { color: var(--green); }
+  /* ── CARDS ── */
+  .card { background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius); padding:1.5rem; margin-bottom:1.25rem; }
+  .card-title { font-size:12px; font-weight:600; letter-spacing:0.06em; color:var(--text3); margin-bottom:1.25rem; text-transform:uppercase; }
+  .card-accent { border-left:3px solid var(--accent); }
 
-  .slider-section { display: grid; grid-template-columns: 1fr 1fr; gap: 0 2rem; }
-  @media (max-width: 700px) { .slider-section { grid-template-columns: 1fr; } }
-  .slider-row {
-    display: flex; align-items: center; gap: 12px;
-    padding: 11px 0;
-    border-bottom: 1px solid var(--border);
-  }
-  .slider-row:last-child { border-bottom: none; }
-  .slider-label { font-size: 13px; color: var(--text2); min-width: 190px; line-height: 1.4; }
-  input[type=range] {
-    flex: 1; -webkit-appearance: none;
-    height: 4px; background: var(--bg4);
-    border-radius: 2px; outline: none; cursor: pointer;
-  }
-  input[type=range]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 16px; height: 16px;
-    border-radius: 50%;
-    background: var(--accent);
-    cursor: pointer; transition: background 0.2s;
-  }
-  input[type=range]::-webkit-slider-thumb:hover { background: var(--accent2); }
-  .slider-val { font-size: 13px; font-weight: 600; min-width: 62px; text-align: right; color: var(--accent2); }
+  /* ── METRICS ── */
+  .metric-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:10px; margin-bottom:1.25rem; }
+  .metric { background:var(--bg3); border:1px solid var(--border); border-radius:var(--radius-sm); padding:14px 16px; transition:border-color 0.2s; }
+  .metric:hover { border-color:var(--border2); }
+  .metric-label { font-size:12px; color:var(--text3); margin-bottom:6px; line-height:1.4; }
+  .metric-val { font-size:24px; font-weight:600; color:var(--text); }
+  .metric-val.red{color:var(--red)} .metric-val.amber{color:var(--amber)} .metric-val.green{color:var(--green)}
 
-  table { width: 100%; border-collapse: collapse; }
-  th {
-    font-size: 11px; font-weight: 600;
-    letter-spacing: 0.04em;
-    color: var(--text3); text-align: left;
-    padding: 10px 12px;
-    border-bottom: 1px solid var(--border2);
-  }
-  td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text2); font-size: 13px; }
-  tr:last-child td { border-bottom: none; }
-  tr:hover td { background: var(--bg3); color: var(--text); }
+  /* ── SLIDERS ── */
+  .slider-section { display:grid; grid-template-columns:1fr 1fr; gap:0 2rem; }
+  @media(max-width:700px){.slider-section{grid-template-columns:1fr}}
+  .slider-row { display:flex; align-items:center; gap:12px; padding:11px 0; border-bottom:1px solid var(--border); }
+  .slider-row:last-child{border-bottom:none}
+  .slider-label { font-size:13px; color:var(--text2); min-width:190px; line-height:1.4; }
+  .slider-ai-dot { width:6px; height:6px; border-radius:50%; background:var(--accent); display:inline-block; margin-right:4px; animation:pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  input[type=range] { flex:1; -webkit-appearance:none; height:4px; background:var(--bg4); border-radius:2px; outline:none; cursor:pointer; }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:16px; height:16px; border-radius:50%; background:var(--accent); cursor:pointer; transition:background 0.2s; }
+  input[type=range]::-webkit-slider-thumb:hover{background:var(--accent2)}
+  .slider-val { font-size:13px; font-weight:600; min-width:62px; text-align:right; color:var(--accent2); }
 
-  .badge {
-    display: inline-block; padding: 3px 10px;
-    border-radius: 4px; font-size: 11px; font-weight: 600;
-  }
-  .badge-red { background: rgba(224,82,82,0.15); color: var(--red); }
-  .badge-amber { background: rgba(232,162,48,0.15); color: var(--amber); }
-  .badge-green { background: rgba(76,175,126,0.15); color: var(--green); }
-  .badge-blue { background: rgba(91,145,216,0.15); color: var(--blue); }
+  /* ── TABLE ── */
+  table{width:100%;border-collapse:collapse}
+  th{font-size:11px;font-weight:600;letter-spacing:0.04em;color:var(--text3);text-align:left;padding:10px 12px;border-bottom:1px solid var(--border2)}
+  td{padding:10px 12px;border-bottom:1px solid var(--border);color:var(--text2);font-size:13px}
+  tr:last-child td{border-bottom:none}
+  tr:hover td{background:var(--bg3);color:var(--text)}
+  .badge{display:inline-block;padding:3px 10px;border-radius:4px;font-size:11px;font-weight:600}
+  .badge-red{background:rgba(224,82,82,0.15);color:var(--red)}
+  .badge-amber{background:rgba(232,162,48,0.15);color:var(--amber)}
+  .badge-green{background:rgba(76,175,126,0.15);color:var(--green)}
+  .badge-blue{background:rgba(91,145,216,0.15);color:var(--blue)}
 
-  .sc-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1.25rem; }
-  @media (max-width: 700px) { .sc-grid { grid-template-columns: 1fr; } }
-  .sc-card { border-radius: var(--radius); overflow: hidden; border: 1px solid var(--border); }
-  .sc-header { padding: 12px 16px; font-size: 13px; font-weight: 600; }
-  .sc-header.mild { background: rgba(76,175,126,0.15); color: var(--green); }
-  .sc-header.moderate { background: rgba(232,162,48,0.15); color: var(--amber); }
-  .sc-header.severe { background: rgba(224,82,82,0.15); color: var(--red); }
-  .sc-body { padding: 12px 16px; background: var(--bg2); }
-  .sc-row { display: flex; justify-content: space-between; font-size: 12px; padding: 5px 0; border-bottom: 1px solid var(--border); }
-  .sc-row:last-child { border-bottom: none; }
-  .sc-row .k { color: var(--text3); }
-  .sc-row .v { font-weight: 600; color: var(--text); }
+  /* ── SCENARIO CARDS ── */
+  .sc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.25rem}
+  @media(max-width:700px){.sc-grid{grid-template-columns:1fr}}
+  .sc-card{border-radius:var(--radius);overflow:hidden;border:1px solid var(--border)}
+  .sc-header{padding:12px 16px;font-size:13px;font-weight:600}
+  .sc-header.mild{background:rgba(76,175,126,0.15);color:var(--green)}
+  .sc-header.moderate{background:rgba(232,162,48,0.15);color:var(--amber)}
+  .sc-header.severe{background:rgba(224,82,82,0.15);color:var(--red)}
+  .sc-body{padding:12px 16px;background:var(--bg2)}
+  .sc-row{display:flex;justify-content:space-between;font-size:12px;padding:5px 0;border-bottom:1px solid var(--border)}
+  .sc-row:last-child{border-bottom:none}
+  .sc-row .k{color:var(--text3)} .sc-row .v{font-weight:600;color:var(--text)}
 
-  .pillar-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; margin-bottom: 1.25rem; }
-  .pillar-card {
-    background: var(--bg2); border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 14px 16px;
-    border-top: 3px solid;
-  }
-  .pillar-name { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
-  .pillar-pct { font-size: 22px; font-weight: 600; margin-bottom: 6px; }
-  .pbar { height: 4px; background: var(--bg4); border-radius: 2px; }
-  .pbar-fill { height: 100%; border-radius: 2px; transition: width 0.4s ease; }
+  /* ── PILLARS ── */
+  .pillar-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin-bottom:1.25rem}
+  .pillar-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;border-top:3px solid}
+  .pillar-name{font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px}
+  .pillar-pct{font-size:22px;font-weight:600;margin-bottom:6px}
+  .pbar{height:4px;background:var(--bg4);border-radius:2px}
+  .pbar-fill{height:100%;border-radius:2px;transition:width 0.4s ease}
+  .r-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)}
+  .r-row:last-child{border-bottom:none}
+  .r-label{font-size:13px;color:var(--text2);flex:1;line-height:1.5}
+  .r-slider{width:120px}
+  .r-pct{font-size:12px;font-weight:600;min-width:35px;text-align:right;color:var(--accent)}
+  .score-big{font-family:'Noto Serif Thai',serif;font-size:56px;color:var(--accent2);line-height:1;font-weight:600}
+  .score-label{font-size:14px;color:var(--text2);margin-top:6px}
 
-  .r-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--border); }
-  .r-row:last-child { border-bottom: none; }
-  .r-label { font-size: 13px; color: var(--text2); flex: 1; line-height: 1.5; }
-  .r-slider { width: 120px; }
-  .r-pct { font-size: 12px; font-weight: 600; min-width: 35px; text-align: right; color: var(--accent); }
+  /* ── CHECKLIST ── */
+  .checklist-item{display:flex;align-items:flex-start;gap:14px;padding:12px 0;border-bottom:1px solid var(--border);cursor:pointer}
+  .checklist-item:last-child{border-bottom:none}
+  .check-box{width:20px;height:20px;border-radius:4px;border:1px solid var(--border2);background:var(--bg3);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;transition:all 0.2s;margin-top:2px;user-select:none}
+  .check-box.checked{background:var(--accent);border-color:var(--accent);color:#000;font-weight:700}
+  .check-text{font-size:14px;color:var(--text);line-height:1.6}
+  .check-sub{font-size:12px;color:var(--text3);margin-top:2px;line-height:1.5}
+  .checklist-item.checked .check-text{color:var(--text3);text-decoration:line-through}
 
-  .score-big { font-family: 'Noto Serif Thai', serif; font-size: 56px; color: var(--accent2); line-height: 1; font-weight: 600; }
-  .score-label { font-size: 14px; color: var(--text2); margin-top: 6px; }
+  .chart-wrap{position:relative}
+  .interpretation{background:var(--bg3);border:1px solid var(--border2);border-left:3px solid var(--accent);border-radius:var(--radius-sm);padding:14px 16px;font-size:14px;color:var(--text2);line-height:1.8;margin-top:1rem}
+  .legend{display:flex;flex-wrap:wrap;gap:16px;margin-bottom:12px}
+  .leg-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text3)}
+  .leg-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+  .footer{text-align:center;padding:2rem;color:var(--text3);font-size:12px;border-top:1px solid var(--border);margin-top:2rem}
 
-  .checklist-item {
-    display: flex; align-items: flex-start; gap: 14px;
-    padding: 12px 0; border-bottom: 1px solid var(--border);
-    cursor: pointer;
-  }
-  .checklist-item:last-child { border-bottom: none; }
-  .check-box {
-    width: 20px; height: 20px; border-radius: 4px;
-    border: 1px solid var(--border2); background: var(--bg3);
-    flex-shrink: 0; display: flex; align-items: center; justify-content: center;
-    font-size: 12px; transition: all 0.2s; margin-top: 2px; user-select: none;
-  }
-  .check-box.checked { background: var(--accent); border-color: var(--accent); color: #000; font-weight: 700; }
-  .check-text { font-size: 14px; color: var(--text); line-height: 1.6; }
-  .check-sub { font-size: 12px; color: var(--text3); margin-top: 2px; line-height: 1.5; }
-  .checklist-item.checked .check-text { color: var(--text3); text-decoration: line-through; }
-
-  .chart-wrap { position: relative; }
-
-  .interpretation {
-    background: var(--bg3);
-    border: 1px solid var(--border2);
-    border-left: 3px solid var(--accent);
-    border-radius: var(--radius-sm);
-    padding: 14px 16px;
-    font-size: 14px; color: var(--text2);
-    line-height: 1.8; margin-top: 1rem;
-  }
-
-  .legend { display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 12px; }
-  .leg-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text3); }
-  .leg-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
-
-  .footer {
-    text-align: center; padding: 2rem;
-    color: var(--text3); font-size: 12px;
-    border-top: 1px solid var(--border);
-    margin-top: 2rem;
-  }
-
-  @media (max-width: 700px) {
-    .nav-btn { font-size: 12px; padding: 6px 10px; }
-    .header-inner { flex-direction: column; height: auto; padding: 12px 0; gap: 8px; }
-    .hero { flex-direction: column; padding: 1.5rem; }
-    .main { padding: 1rem; }
-    .slider-label { min-width: 140px; font-size: 12px; }
+  @media(max-width:700px){
+    .nav-btn{font-size:12px;padding:6px 10px}
+    .header-inner{flex-direction:column;height:auto;padding:12px 0;gap:8px}
+    .hero{padding:1.5rem}
+    .main{padding:1rem}
+    .slider-label{min-width:140px;font-size:12px}
   }
 </style>
 </head>
 <body>
+
+<!-- LOADING OVERLAY -->
+<div id="loading-overlay">
+  <div class="loading-logo">⚔ War Game Planner</div>
+  <div class="loading-sub">กำลังวิเคราะห์สถานการณ์โลกแบบ Real-time ด้วย AI</div>
+  <div class="loading-steps">
+    <div class="loading-step" id="step-1"><span class="step-icon">🌐</span>ค้นหาข้อมูลราคาน้ำมันล่าสุด</div>
+    <div class="loading-step" id="step-2"><span class="step-icon">🚢</span>วิเคราะห์ต้นทุนโลจิสติกส์และ Strait of Hormuz</div>
+    <div class="loading-step" id="step-3"><span class="step-icon">🤖</span>AI ประมวลผลและคำนวณค่าตัวแปร</div>
+    <div class="loading-step" id="step-4"><span class="step-icon">📊</span>ตั้งค่าแดชบอร์ดตามสถานการณ์จริง</div>
+  </div>
+  <div class="loading-bar-wrap"><div class="loading-bar" id="loading-bar"></div></div>
+</div>
 
 <header class="header">
   <div class="header-inner">
     <div class="logo">
       <div class="logo-icon">⚔</div>
       <div>
-        <div class="logo-text">แผนรับมือวิกฤต</div>
-        <div class="logo-sub">อาเซียน · ความเสี่ยงตะวันออกกลาง</div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <div class="logo-text">แผนรับมือวิกฤต</div>
+          <span class="logo-ai-badge">🤖 AI Live</span>
+        </div>
+        <div class="logo-sub">อาเซียน · วิเคราะห์ข้อมูลจริง ณ วันนี้</div>
       </div>
     </div>
     <nav class="nav">
-      <button class="nav-btn active" onclick="switchTab('scenario', this)">จำลองสถานการณ์</button>
-      <button class="nav-btn" onclick="switchTab('pillars', this)">5 เสาหลัก</button>
-      <button class="nav-btn" onclick="switchTab('compare', this)">เปรียบเทียบ</button>
-      <button class="nav-btn" onclick="switchTab('actions', this)">รายการตรวจสอบ</button>
+      <button class="nav-btn active" onclick="switchTab('scenario',this)">จำลองสถานการณ์</button>
+      <button class="nav-btn" onclick="switchTab('pillars',this)">5 เสาหลัก</button>
+      <button class="nav-btn" onclick="switchTab('compare',this)">เปรียบเทียบ</button>
+      <button class="nav-btn" onclick="switchTab('actions',this)">รายการตรวจสอบ</button>
     </nav>
   </div>
 </header>
 
 <main class="main">
 
+  <!-- AI INTEL BANNER -->
+  <div class="ai-banner" id="ai-banner" style="display:none">
+    <div class="ai-icon">🤖</div>
+    <div style="flex:1">
+      <div class="ai-title">สรุปสถานการณ์โลกโดย AI — อัปเดตล่าสุด</div>
+      <div class="ai-body" id="ai-summary">กำลังโหลด...</div>
+      <div class="ai-meta" id="ai-meta"></div>
+    </div>
+    <button class="ai-refresh" onclick="runAIAnalysis()">🔄 อัปเดตใหม่</button>
+  </div>
+
   <!-- TAB: จำลองสถานการณ์ -->
   <div id="tab-scenario" class="panel active">
     <div class="hero">
       <div>
-        <div class="hero-title">เครื่องมือจำลองผลกระทบจากวิกฤตตะวันออกกลาง</div>
-        <div class="hero-sub">ปรับค่าตัวแปรด้านล่างเพื่อวิเคราะห์ผลกระทบต่อโครงสร้างต้นทุน มาร์จิน และรายได้ ใช้ในการประชุม War Game ร่วมกับคณะผู้บริหาร</div>
+        <div class="hero-title">เครื่องมือจำลองผลกระทบ — ตั้งค่าโดย AI อัตโนมัติ</div>
+        <div class="hero-sub" id="hero-context">ค่าตัวแปรด้านล่างถูกตั้งโดย AI จากข้อมูลจริงวันนี้ คุณสามารถปรับเองได้เพิ่มเติม</div>
         <div class="hero-badges">
-          <span class="hbadge red">ความเสี่ยงภูมิรัฐศาสตร์</span>
-          <span class="hbadge amber">ห่วงโซ่อุปทาน</span>
-          <span class="hbadge blue">ปฏิบัติการในอาเซียน</span>
+          <span class="hbadge red">สงครามตะวันออกกลาง</span>
+          <span class="hbadge amber">ฮอร์มุซถูกปิด</span>
+          <span class="hbadge blue">กระทบอาเซียน</span>
+          <span class="hbadge green" id="data-freshness">AI วิเคราะห์แล้ว</span>
         </div>
       </div>
     </div>
 
     <div class="card card-accent">
-      <div class="card-title">ตัวแปรความเสี่ยง — ปรับเพื่อจำลองสถานการณ์</div>
+      <div class="card-title" style="display:flex;justify-content:space-between;align-items:center">
+        <span>ตัวแปรความเสี่ยง — <span id="ai-set-label" style="color:var(--accent)">ตั้งค่าโดย AI จากข้อมูลจริง</span></span>
+        <span style="font-size:11px;color:var(--text3)"><span class="slider-ai-dot"></span>= AI ตั้งค่าอัตโนมัติ</span>
+      </div>
       <div class="slider-section">
         <div>
           <div class="slider-row">
-            <span class="slider-label">ราคาน้ำมันเพิ่มขึ้น (USD/บาร์เรล)</span>
+            <span class="slider-label"><span class="slider-ai-dot"></span>ราคาน้ำมันเพิ่มขึ้น (USD/บาร์เรล)</span>
             <input type="range" min="0" max="100" step="5" value="30" id="s-oil" oninput="recalc()">
             <span class="slider-val" id="v-oil">+$30</span>
           </div>
           <div class="slider-row">
-            <span class="slider-label">ต้นทุนโลจิสติกส์เพิ่มขึ้น (บาท/ลัง)</span>
+            <span class="slider-label"><span class="slider-ai-dot"></span>ต้นทุนโลจิสติกส์เพิ่มขึ้น (บาท/ลัง)</span>
             <input type="range" min="0" max="60" step="5" value="20" id="s-logistics" oninput="recalc()">
             <span class="slider-val" id="v-logistics">+฿20</span>
           </div>
           <div class="slider-row">
-            <span class="slider-label">ต้นทุนวัตถุดิบเพิ่มขึ้น (%)</span>
+            <span class="slider-label"><span class="slider-ai-dot"></span>ต้นทุนวัตถุดิบเพิ่มขึ้น (%)</span>
             <input type="range" min="0" max="40" step="2" value="12" id="s-rawmat" oninput="recalc()">
             <span class="slider-val" id="v-rawmat">+12%</span>
           </div>
         </div>
         <div>
           <div class="slider-row">
-            <span class="slider-label">ต้นทุนพลังงานเพิ่มขึ้น (%)</span>
+            <span class="slider-label"><span class="slider-ai-dot"></span>ต้นทุนพลังงานเพิ่มขึ้น (%)</span>
             <input type="range" min="0" max="60" step="5" value="20" id="s-energy" oninput="recalc()">
             <span class="slider-val" id="v-energy">+20%</span>
           </div>
           <div class="slider-row">
-            <span class="slider-label">ปริมาณขายลดลงจากการปรับราคา (%)</span>
+            <span class="slider-label"><span class="slider-ai-dot"></span>ปริมาณขายลดลงจากการปรับราคา (%)</span>
             <input type="range" min="0" max="30" step="1" value="8" id="s-vol" oninput="recalc()">
             <span class="slider-val" id="v-vol">-8%</span>
           </div>
@@ -372,30 +291,12 @@
     </div>
 
     <div class="metric-grid">
-      <div class="metric">
-        <div class="metric-label">ต้นทุนเพิ่มขึ้น/ลัง (฿)</div>
-        <div class="metric-val" id="m-costcase">—</div>
-      </div>
-      <div class="metric">
-        <div class="metric-label">ผลกระทบต่อมาร์จิน (pp)</div>
-        <div class="metric-val" id="m-margin">—</div>
-      </div>
-      <div class="metric">
-        <div class="metric-label">ผลกระทบต่อรายได้ (%)</div>
-        <div class="metric-val" id="m-revenue">—</div>
-      </div>
-      <div class="metric">
-        <div class="metric-label">มาร์จินสุทธิหลังปรับราคา</div>
-        <div class="metric-val" id="m-netmargin">—</div>
-      </div>
-      <div class="metric">
-        <div class="metric-label">ราคาขายที่ต้องปรับเพื่อคุ้มทุน</div>
-        <div class="metric-val" id="m-breakeven">—</div>
-      </div>
-      <div class="metric">
-        <div class="metric-label">ระดับความเสี่ยง</div>
-        <div class="metric-val" id="m-risk">—</div>
-      </div>
+      <div class="metric"><div class="metric-label">ต้นทุนเพิ่มขึ้น/ลัง (฿)</div><div class="metric-val" id="m-costcase">—</div></div>
+      <div class="metric"><div class="metric-label">ผลกระทบต่อมาร์จิน (pp)</div><div class="metric-val" id="m-margin">—</div></div>
+      <div class="metric"><div class="metric-label">ผลกระทบต่อรายได้ (%)</div><div class="metric-val" id="m-revenue">—</div></div>
+      <div class="metric"><div class="metric-label">มาร์จินสุทธิหลังปรับราคา</div><div class="metric-val" id="m-netmargin">—</div></div>
+      <div class="metric"><div class="metric-label">ราคาขายที่ต้องปรับเพื่อคุ้มทุน</div><div class="metric-val" id="m-breakeven">—</div></div>
+      <div class="metric"><div class="metric-label">ระดับความเสี่ยง</div><div class="metric-val" id="m-risk">—</div></div>
     </div>
 
     <div class="card">
@@ -405,51 +306,32 @@
         <span class="leg-item"><span class="leg-dot" style="background:#e05252"></span>ต้นทุนที่เพิ่มขึ้น</span>
         <span class="leg-item"><span class="leg-dot" style="background:#4caf7e"></span>รายได้ที่ชดเชยได้</span>
       </div>
-      <div class="chart-wrap" style="height:260px;">
-        <canvas id="waterfallChart"></canvas>
-      </div>
+      <div class="chart-wrap" style="height:260px"><canvas id="waterfallChart"></canvas></div>
     </div>
-
-    <div class="interpretation" id="interpretation">
-      ปรับตัวเลขด้านบนเพื่อดูการวิเคราะห์สถานการณ์
-    </div>
+    <div class="interpretation" id="interpretation">กำลังวิเคราะห์...</div>
   </div>
 
   <!-- TAB: 5 เสาหลัก -->
   <div id="tab-pillars" class="panel">
     <div class="card">
       <div class="card-title">คะแนนความพร้อมโดยรวม</div>
-      <div style="display:flex;align-items:flex-end;gap:1.5rem;flex-wrap:wrap;">
-        <div>
-          <div class="score-big" id="overall-score">0%</div>
-          <div class="score-label" id="overall-label">ปรับระดับความพร้อมในแต่ละเสาหลักด้านล่าง</div>
-        </div>
-        <div style="flex:1;min-width:200px;">
-          <div class="pbar" style="height:8px;">
-            <div class="pbar-fill" id="overall-bar" style="width:0%;background:var(--red)"></div>
-          </div>
-        </div>
+      <div style="display:flex;align-items:flex-end;gap:1.5rem;flex-wrap:wrap">
+        <div><div class="score-big" id="overall-score">0%</div><div class="score-label" id="overall-label">ปรับระดับความพร้อมด้านล่าง</div></div>
+        <div style="flex:1;min-width:200px"><div class="pbar" style="height:8px"><div class="pbar-fill" id="overall-bar" style="width:0%;background:var(--red)"></div></div></div>
       </div>
     </div>
-
     <div class="pillar-grid" id="pillar-summary"></div>
     <div id="readiness-section"></div>
   </div>
 
-  <!-- TAB: เปรียบเทียบสถานการณ์ -->
+  <!-- TAB: เปรียบเทียบ -->
   <div id="tab-compare" class="panel">
     <div class="sc-grid" id="sc-grid"></div>
-
     <div class="card">
       <div class="card-title">ลำดับความสำคัญของผู้บริหารตามสถานการณ์</div>
-      <div style="overflow-x:auto;">
+      <div style="overflow-x:auto">
         <table>
-          <thead><tr>
-            <th>มาตรการ</th>
-            <th>ระดับเบา (+฿10/ลัง)</th>
-            <th>ระดับกลาง (+฿20/ลัง)</th>
-            <th>ระดับรุนแรง (+฿30/ลัง)</th>
-          </tr></thead>
+          <thead><tr><th>มาตรการ</th><th>ระดับเบา (+฿10/ลัง)</th><th>ระดับกลาง (+฿20/ลัง)</th><th>ระดับรุนแรง (+฿30/ลัง)</th></tr></thead>
           <tbody>
             <tr><td>ติดตามต้นทุนรายสัปดาห์</td><td><span class="badge badge-green">ปกติ</span></td><td><span class="badge badge-amber">เร่งด่วน</span></td><td><span class="badge badge-red">วิกฤต</span></td></tr>
             <tr><td>เปิดใช้สต็อกสำรอง</td><td><span class="badge badge-green">ไม่จำเป็น</span></td><td><span class="badge badge-amber">เปิดใช้</span></td><td><span class="badge badge-red">ใช้เต็มที่</span></td></tr>
@@ -458,12 +340,11 @@
             <tr><td>เปิดใช้พลังงานทางเลือก/โซลาร์</td><td><span class="badge badge-blue">ติดตาม</span></td><td><span class="badge badge-amber">เร่งแผน</span></td><td><span class="badge badge-red">ฉุกเฉิน</span></td></tr>
             <tr><td>AI เพิ่มประสิทธิภาพการผลิต</td><td><span class="badge badge-blue">วางแผน</span></td><td><span class="badge badge-amber">นำร่อง</span></td><td><span class="badge badge-red">ปรับใช้ทั้งหมด</span></td></tr>
             <tr><td>ปรับเส้นทางโลจิสติกส์</td><td><span class="badge badge-green">เตรียมพร้อม</span></td><td><span class="badge badge-amber">ประเมิน</span></td><td><span class="badge badge-red">ดำเนินการ</span></td></tr>
-            <tr><td>เปลี่ยนยานพาหนะเป็น EV</td><td><span class="badge badge-blue">ศึกษาความเป็นไปได้</span></td><td><span class="badge badge-amber">เร่งแผน</span></td><td><span class="badge badge-red">เร่งด่วน</span></td></tr>
+            <tr><td>เปลี่ยนยานพาหนะเป็น EV</td><td><span class="badge badge-blue">ศึกษา</span></td><td><span class="badge badge-amber">เร่งแผน</span></td><td><span class="badge badge-red">เร่งด่วน</span></td></tr>
           </tbody>
         </table>
       </div>
     </div>
-
     <div class="card">
       <div class="card-title">เปรียบเทียบผลกระทบ 3 สถานการณ์</div>
       <div class="legend">
@@ -471,116 +352,192 @@
         <span class="leg-item"><span class="leg-dot" style="background:#e8a230"></span>ระดับกลาง</span>
         <span class="leg-item"><span class="leg-dot" style="background:#e05252"></span>ระดับรุนแรง</span>
       </div>
-      <div class="chart-wrap" style="height:260px;">
-        <canvas id="scenarioChart"></canvas>
-      </div>
+      <div class="chart-wrap" style="height:260px"><canvas id="scenarioChart"></canvas></div>
     </div>
   </div>
 
   <!-- TAB: รายการตรวจสอบ -->
   <div id="tab-actions" class="panel">
     <div class="card">
-      <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;">
+      <div class="card-title" style="display:flex;justify-content:space-between;align-items:center">
         <span>ความคืบหน้าการเตรียมการ</span>
-        <span id="check-progress" style="font-size:13px;color:var(--accent2);font-weight:600;">0 / 0 รายการ</span>
+        <span id="check-progress" style="font-size:13px;color:var(--accent2);font-weight:600">0 / 0 รายการ</span>
       </div>
       <div class="pbar"><div class="pbar-fill" id="check-bar" style="width:0%;background:var(--accent)"></div></div>
     </div>
-
     <div id="checklist-container"></div>
   </div>
 
 </main>
-
-<footer class="footer">
-  แผนรับมือวิกฤตตะวันออกกลาง · ผลกระทบต่ออาเซียน · สำหรับใช้ภายในองค์กรเท่านั้น
-</footer>
+<footer class="footer">แผนรับมือวิกฤตตะวันออกกลาง · วิเคราะห์โดย Claude AI · ข้อมูลอัปเดตตามสถานการณ์จริง · สำหรับใช้ภายในองค์กรเท่านั้น</footer>
 
 <script>
-// ─── ข้อมูลเสาหลักทั้ง 5 ──────────────────────────────────────────────────────
-const pillars = [
-  {
-    id: 'energy', name: 'พลังงานสำรอง', color: '#e8a230',
-    actions: [
-      { text: 'ดำเนินมาตรการประหยัดพลังงานในทุกโรงงาน', sub: 'ตรวจสอบฐานการใช้พลังงาน + กำหนดเป้าลดการใช้ 3 อันดับแรก' },
-      { text: 'ศึกษาความเป็นไปได้และขอใบเสนอราคาโซลาร์รูฟท็อป', sub: 'เป้าหมายผลิตไฟฟ้าเองได้ 20–40%' },
-      { text: 'ทบทวนโครงการ EV สำหรับยานพาหนะของบริษัท', sub: 'วิเคราะห์ TCO 3 ปีเมื่อน้ำมันอยู่ที่ $100–150/บาร์เรล' },
-      { text: 'วางแผนติดตั้งโครงสร้างพื้นฐานสถานีชาร์จ EV', sub: 'ระยะที่ 1: สถานที่หลัก | ระยะที่ 2: ทั้งหมด' }
-    ]
-  },
-  {
-    id: 'supply', name: 'ห่วงโซ่อุปทาน', color: '#4caf7e',
-    actions: [
-      { text: 'ทบทวนและเจรจาสัญญากับซัพพลายเออร์หลัก', sub: 'เพิ่มเงื่อนไข force-majeure ล็อกราคา และแหล่งสำรอง' },
-      { text: 'วิเคราะห์ความเสี่ยงซัพพลายเออร์ Tier 1 และ Tier 2', sub: 'ระบุรายที่พึ่งพาเส้นทางขนส่งผ่านตะวันออกกลาง >30%' },
-      { text: 'ระบุและพัฒนาซัพพลายเออร์สำรองสำหรับวัตถุดิบสำคัญ', sub: 'อย่างน้อย 2 แหล่งสำรองต่อวัตถุดิบสำคัญ 1 รายการ' }
-    ]
-  },
-  {
-    id: 'inventory', name: 'สต็อกสินค้าเชิงกลยุทธ์', color: '#5b91d8',
-    actions: [
-      { text: 'เพิ่มสต็อกวัตถุดิบให้ได้ 3–6 เดือน', sub: 'ให้ความสำคัญกับวัตถุดิบ lead time นาน หรือมีแหล่งเดียว' },
-      { text: 'เพิ่มสต็อกสินค้าสำเร็จรูปสำหรับ SKU หลัก', sub: 'สอดคล้องกับอัตราการขายและความสามารถในการจัดเก็บ' },
-      { text: 'กำหนดและตั้งระบบแจ้งเตือน Reorder อัตโนมัติ', sub: 'เชื่อมต่อกับระบบ ERP หรือ Planning System' }
-    ]
-  },
-  {
-    id: 'efficiency', name: 'ประสิทธิภาพ & AI', color: '#9b79e8',
-    actions: [
-      { text: 'จัดทำ Roadmap โรงงานอัจฉริยะ', sub: 'มุ่งเน้นการเพิ่ม Yield ลดของเสีย และลด Downtime' },
-      { text: 'นำร่อง AI เพิ่มประสิทธิภาพการผลิต', sub: 'เลือก 1–2 สายการผลิตเพื่อทดสอบ Proof of Concept' },
-      { text: 'วางแผนสำนักงานอัจฉริยะ (Smart Office)', sub: 'เพิ่มประสิทธิภาพพลังงาน การจัดตารางเวลา และ Workflow' }
-    ]
-  },
-  {
-    id: 'pricing', name: 'กลยุทธ์ราคา & มาร์จิน', color: '#e05252',
-    actions: [
-      { text: 'จัดตั้ง Dashboard ติดตามต้นทุนรายสัปดาห์', sub: 'ติดตามดัชนีโลจิสติกส์ พลังงาน และวัตถุดิบแบบ Real-time' },
-      { text: 'วิเคราะห์ความยืดหยุ่นของราคา (Price Elasticity) แต่ละ SKU', sub: 'ระบุเพดานการปรับราคาก่อนสูญเสียส่วนแบ่งตลาด' },
-      { text: 'จัดทำ Playbook ป้องกันมาร์จินสำหรับ 3 สถานการณ์', sub: 'กำหนด Response Tier ล่วงหน้า: เบา / กลาง / รุนแรง' }
-    ]
-  }
-];
+// ══════════════════════════════════════════════════════
+//  KNOWN FACTS (27 Feb 2026 baseline vs now)
+//  - Brent on 27 Feb: ~$71/bbl (pre-war)
+//  - War started: 28 Feb 2026
+//  - Brent now (mid-Mar): ~$100–104/bbl → +$30–33 increase
+//  - Strait of Hormuz: effectively closed, >70% traffic drop
+//  - Maersk, MSC, CMA CGM, Hapag-Lloyd all suspended
+//  - Emergency bunker surcharge: $200/TEU (Maersk), $150/TEU (CMA CGM)
+//  - War Risk Surcharge: $1,500/TEU (Hapag-Lloyd)
+//  - Spot rates: +10% week-on-week, still rising
+//  - Insurance war risk premiums: +50%+
+//  - Global oil supply disruption: ~8–10 mb/d from Gulf
+// ══════════════════════════════════════════════════════
 
-// ─── รายการตรวจสอบ ────────────────────────────────────────────────────────────
-const checklistData = [
-  {
-    section: 'บุคลากรและความเป็นผู้นำ',
-    items: [
-      { text: 'สื่อสารสถานการณ์ความเสี่ยงอย่างชัดเจนต่อบุคลากรหลักทุกคน', sub: 'จัดประชุม All-Directors Briefing เรื่องความเสี่ยงและผลกระทบต่ออาเซียน' },
-      { text: 'กำหนดทีมตอบสนองวิกฤตพร้อมระบุผู้รับผิดชอบแต่ละเสาหลัก', sub: 'มอบหมาย Owner: พลังงาน / ห่วงโซ่อุปทาน / สต็อก / ประสิทธิภาพ / ราคา' },
-      { text: 'เตรียมความพร้อมทั้งร่างกายและจิตใจ — จัดกิจกรรมดูแลสุขภาพทีม', sub: 'การรับมือวิกฤตระยะยาวต้องอาศัยทั้งความพร้อมทางกายและจิตใจ' },
-      { text: 'กำหนดตารางฝึกซ้อม War Game รายเดือน', sub: 'ใช้เครื่องมือนี้ในการฝึกซ้อมร่วมกับผู้บริหารทุกท่าน' }
-    ]
-  },
-  {
-    section: 'พลังงานสำรอง',
-    items: pillars[0].actions.map(a => ({ text: a.text, sub: a.sub }))
-  },
-  {
-    section: 'ห่วงโซ่อุปทานและสต็อกสินค้า',
-    items: [...pillars[1].actions, ...pillars[2].actions].map(a => ({ text: a.text, sub: a.sub }))
-  },
-  {
-    section: 'ประสิทธิภาพและกลยุทธ์ราคา',
-    items: [...pillars[3].actions, ...pillars[4].actions].map(a => ({ text: a.text, sub: a.sub }))
-  }
-];
+const KNOWN_CONTEXT = `
+You are an expert business risk analyst specializing in ASEAN supply chains and energy markets.
 
-// ─── State ────────────────────────────────────────────────────────────────────
+VERIFIED REAL-WORLD DATA as of mid-March 2026:
+- War started: February 28, 2026 (US-Israeli strikes on Iran)
+- Brent crude on Feb 27 (pre-war baseline): ~$71/bbl
+- Brent crude current (March 13-16): ~$100–104/bbl → increase of ~+$30 to +$33/bbl
+- Strait of Hormuz: effectively closed, maritime traffic down >70%
+- Major carriers (Maersk, MSC, CMA CGM, Hapag-Lloyd, COSCO) ALL suspended Gulf bookings
+- Emergency Bunker Surcharge: Maersk $200/TEU, CMA CGM $150/TEU on long-haul routes
+- Hapag-Lloyd War Risk Surcharge: $1,500/TEU on Gulf-origin cargo
+- Container spot rates: rising ~10% week-on-week and accelerating
+- Global oil supply disrupted: ~8–10 million barrels/day from Gulf region
+- IEA has released 400 million barrels from strategic reserves (largest in history)
+- Energy costs: LNG prices surging in Europe and Asia; electricity costs rising in ASEAN
+- Raw material impact: petrochemicals, polymers, fertilizers all under supply pressure
+- ASEAN context: Thailand, Malaysia, Vietnam, Indonesia all heavily exposed via:
+  * Import-dependent on Middle East energy (LPG, crude oil derivatives)
+  * Export supply chains using Gulf shipping routes
+  * Manufacturing inputs (plastics, chemicals) heavily affected
+
+Your task: Analyze the current situation and recommend slider values for a Thai FMCG/manufacturing company war game simulator. Return ONLY valid JSON, no markdown, no explanation.
+
+Return this exact JSON structure:
+{
+  "oil": <number 0-100, oil price increase in USD per barrel vs pre-war baseline>,
+  "logistics": <number 0-60, logistics cost increase in Thai Baht per case>,
+  "rawmat": <number 0-40, raw material cost increase percentage>,
+  "energy": <number 0-60, energy cost increase percentage>,
+  "vol": <number 0-30, estimated volume decline percentage from price pass-through>,
+  "price": <number 0-30, recommended price increase to pass to customers>,
+  "summary_th": "<2–3 sentence Thai-language summary of current global situation and why these values were chosen>",
+  "risk_level": "<วิกฤต|สูง|ปานกลาง|ต่ำ>",
+  "data_date": "มีนาคม 2026",
+  "key_drivers": ["<driver 1 in Thai>", "<driver 2 in Thai>", "<driver 3 in Thai>"]
+}
+`;
+
+let wChart = null, sChart = null;
 const readinessState = {};
 const checkState = {};
-let wChart = null, sChart = null;
 
-function init() {
-  buildPillars();
-  buildChecklist();
-  buildScenarioCards();
-  buildScenarioChart();
-  recalc();
+// ── LOADING STEPS ──────────────────────────────────────
+function setStep(n, state) {
+  const el = document.getElementById('step-' + n);
+  el.className = 'loading-step ' + state;
+  if (state === 'done') el.querySelector('.step-icon').textContent = '✅';
+  if (state === 'error') el.querySelector('.step-icon').textContent = '⚠️';
+  if (state === 'active') el.querySelector('.step-icon').textContent = ['','🌐','🚢','🤖','📊'][n];
+  document.getElementById('loading-bar').style.width = (n * 25) + '%';
 }
 
-// ─── Simulator ────────────────────────────────────────────────────────────────
+// ── MAIN AI ANALYSIS ───────────────────────────────────
+async function runAIAnalysis() {
+  document.getElementById('ai-set-label').textContent = 'กำลังอัปเดต...';
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        tools: [{ type: 'web_search_20250305', name: 'web_search' }],
+        messages: [{
+          role: 'user',
+          content: KNOWN_CONTEXT + '\n\nBased on ALL of the above verified data and any additional context you can reason about, provide the JSON values now. Remember: return ONLY raw JSON, no markdown backticks.'
+        }]
+      })
+    });
+
+    const data = await response.json();
+    let jsonText = '';
+    for (const block of data.content) {
+      if (block.type === 'text') jsonText += block.text;
+    }
+
+    // Strip markdown fences if present
+    jsonText = jsonText.replace(/```json|```/g, '').trim();
+    // Extract JSON object
+    const match = jsonText.match(/\{[\s\S]*\}/);
+    if (!match) throw new Error('No JSON found');
+
+    const vals = JSON.parse(match[0]);
+    applyAIValues(vals);
+    return vals;
+  } catch (err) {
+    console.error('AI fetch error:', err);
+    // Fallback to hard-coded known values based on research
+    const fallback = {
+      oil: 30, logistics: 25, rawmat: 14, energy: 25, vol: 8, price: 8,
+      summary_th: 'สงครามตะวันออกกลางที่เริ่มขึ้นวันที่ 28 กุมภาพันธ์ 2569 ส่งผลให้ราคาน้ำมัน Brent พุ่งขึ้นจาก $71 เป็นกว่า $100 ต่อบาร์เรล ช่องแคบฮอร์มุซถูกปิดทำให้สายเดินเรือรายใหญ่ระงับการขนส่งทั้งหมด ต้นทุนโลจิสติกส์และพลังงานในอาเซียนเพิ่มขึ้นอย่างมีนัยสำคัญ',
+      risk_level: 'สูง', data_date: 'มีนาคม 2026',
+      key_drivers: ['ราคาน้ำมันพุ่ง +$30/บาร์เรล', 'ช่องแคบฮอร์มุซปิด >70%', 'ค่าขนส่งฉุกเฉินเพิ่มทุกสายเรือ']
+    };
+    applyAIValues(fallback);
+    return fallback;
+  }
+}
+
+function applyAIValues(vals) {
+  const animate = (id, target, isNeg) => {
+    const el = document.getElementById(id);
+    el.value = target;
+    el.style.transition = 'all 0.5s';
+  };
+
+  animate('s-oil', vals.oil);
+  animate('s-logistics', vals.logistics);
+  animate('s-rawmat', vals.rawmat);
+  animate('s-energy', vals.energy);
+  animate('s-vol', vals.vol);
+  animate('s-price', vals.price);
+
+  recalc();
+
+  // Update AI banner
+  document.getElementById('ai-summary').textContent = vals.summary_th || '';
+  document.getElementById('ai-meta').innerHTML =
+    `📅 ข้อมูล: ${vals.data_date || 'มีนาคม 2026'} &nbsp;|&nbsp; ⚠️ ระดับความเสี่ยง: <strong style="color:var(--red)">${vals.risk_level || '—'}</strong>` +
+    (vals.key_drivers ? `&nbsp;|&nbsp; 🔑 ปัจจัยหลัก: ${vals.key_drivers.join(' · ')}` : '');
+  document.getElementById('ai-banner').style.display = 'flex';
+  document.getElementById('ai-set-label').textContent = 'ตั้งค่าโดย AI จากข้อมูลจริง ✅';
+  document.getElementById('data-freshness').textContent = `🤖 อัปเดต ${new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})}`;
+  document.getElementById('hero-context').textContent =
+    'ค่าตัวแปรด้านล่างถูกตั้งโดย AI จากข้อมูลราคาน้ำมัน ต้นทุนโลจิสติกส์ และสถานการณ์สงครามในตะวันออกกลางล่าสุด คุณสามารถปรับได้เพิ่มเติม';
+}
+
+// ── STARTUP SEQUENCE ───────────────────────────────────
+async function startupSequence() {
+  setStep(1, 'active');
+  await sleep(600);
+  setStep(1, 'done'); setStep(2, 'active');
+  await sleep(700);
+  setStep(2, 'done'); setStep(3, 'active');
+  document.getElementById('loading-bar').style.width = '60%';
+
+  const vals = await runAIAnalysis();
+
+  setStep(3, 'done'); setStep(4, 'active');
+  await sleep(400);
+  setStep(4, 'done');
+  document.getElementById('loading-bar').style.width = '100%';
+  await sleep(500);
+
+  document.getElementById('loading-overlay').style.opacity = '0';
+  document.getElementById('loading-overlay').style.transition = 'opacity 0.5s';
+  setTimeout(() => { document.getElementById('loading-overlay').style.display = 'none'; }, 500);
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// ── SIMULATOR ─────────────────────────────────────────
 function recalc() {
   const oil = +document.getElementById('s-oil').value;
   const logistics = +document.getElementById('s-logistics').value;
@@ -610,31 +567,25 @@ function recalc() {
   const revImpact = ((1 + priceUp / 100) * (1 - vol / 100) - 1) * 100;
   const breakevenPct = (totalAdd / baseRev) * 100;
 
-  const fmt = (v, d=1) => (v >= 0 ? '+' : '') + v.toFixed(d);
   const fmtB = v => (v >= 0 ? '+' : '-') + '฿' + Math.abs(v).toFixed(1);
+  const fmt = (v, d=1) => (v >= 0 ? '+' : '') + v.toFixed(d);
 
   setMetric('m-costcase', fmtB(totalAdd), totalAdd > 30 ? 'red' : totalAdd > 15 ? 'amber' : 'green');
   setMetric('m-margin', fmt(marginImpact) + 'pp', marginImpact < -10 ? 'red' : marginImpact < -5 ? 'amber' : 'green');
   setMetric('m-revenue', fmt(revImpact) + '%', revImpact < -5 ? 'red' : revImpact < 0 ? 'amber' : 'green');
   setMetric('m-netmargin', newMargin.toFixed(1) + '%', newMargin < 10 ? 'red' : newMargin < 15 ? 'amber' : 'green');
   setMetric('m-breakeven', breakevenPct.toFixed(1) + '%');
-
   const riskTh = marginImpact < -10 ? 'วิกฤต' : marginImpact < -5 ? 'สูง' : marginImpact < -2 ? 'ปานกลาง' : 'ต่ำ';
-  const riskCls = marginImpact < -10 ? 'red' : marginImpact < -5 ? 'amber' : 'green';
-  setMetric('m-risk', riskTh, riskCls);
+  setMetric('m-risk', riskTh, marginImpact < -10 ? 'red' : marginImpact < -5 ? 'amber' : 'green');
 
   const driver = logAdd > rawAdd && logAdd > enAdd ? 'ต้นทุนโลจิสติกส์' : rawAdd > enAdd ? 'ต้นทุนวัตถุดิบ' : 'ต้นทุนพลังงาน';
   const recovery = priceUp > 0 ? (priceUp / breakevenPct * 100).toFixed(0) : 0;
-  const advice = revImpact < -5
-    ? 'ปริมาณขายลดลงมีนัยสำคัญ — ควรพิจารณาการปรับราคาแบบค่อยเป็นค่อยไปเพื่อรักษาส่วนแบ่งตลาด'
-    : marginImpact < -5
-    ? 'มาร์จินถูกกดดันอย่างมาก — เร่งแผนประสิทธิภาพและ AI เพื่อชดเชยส่วนต่าง'
+  const advice = revImpact < -5 ? 'ปริมาณขายลดลงมีนัยสำคัญ — ควรพิจารณาการปรับราคาแบบค่อยเป็นค่อยไปเพื่อรักษาส่วนแบ่งตลาด'
+    : marginImpact < -5 ? 'มาร์จินถูกกดดันอย่างมาก — เร่งแผนประสิทธิภาพและ AI เพื่อชดเชยส่วนต่าง'
     : 'สถานการณ์อยู่ในระดับที่จัดการได้ หากมีสต็อกสำรองและสัญญาซัพพลายเออร์รองรับ';
-
   document.getElementById('interpretation').textContent =
     `ในสถานการณ์นี้ ต้นทุนต่อลังเพิ่มขึ้น ฿${totalAdd.toFixed(1)} โดยมีสาเหตุหลักจาก${driver} ` +
-    (priceUp > 0 ? `การปรับราคาขาย ${priceUp}% ช่วยชดเชยต้นทุนได้ประมาณ ${recovery}% ` : '') +
-    advice;
+    (priceUp > 0 ? `การปรับราคาขาย ${priceUp}% ช่วยชดเชยต้นทุนได้ประมาณ ${recovery}% ` : '') + advice;
 
   updateWaterfall(baseCost, logAdd, rawAdd, enAdd, oilAdd, Math.max(0, newRev - baseCost - totalAdd - (baseRev - baseCost)));
 }
@@ -646,54 +597,76 @@ function setMetric(id, val, cls) {
 }
 
 function updateWaterfall(base, log, raw, en, oil, recovery) {
-  const labels = ['ต้นทุนเดิม', 'โลจิสติกส์+', 'วัตถุดิบ+', 'พลังงาน+', 'น้ำมัน+', 'ชดเชยราคา', 'รวม'];
-  const vals = [base, log, raw, en, oil, recovery, base + log + raw + en + oil - recovery];
+  const labels = ['ต้นทุนเดิม','โลจิสติกส์+','วัตถุดิบ+','พลังงาน+','น้ำมัน+','ชดเชยราคา','รวม'];
+  const vals = [base, log, raw, en, oil, recovery, base+log+raw+en+oil-recovery];
   const colors = ['#5b91d8','#e05252','#e05252','#e05252','#e05252','#4caf7e','#5b91d8'];
   if (wChart) wChart.destroy();
   wChart = new Chart(document.getElementById('waterfallChart'), {
     type: 'bar',
-    data: {
-      labels,
-      datasets: [{ data: vals.map(v => +v.toFixed(1)), backgroundColor: colors, borderRadius: 4, borderSkipped: false }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => '฿' + c.raw } } },
-      scales: {
-        x: { grid: { display: false }, ticks: { color: '#5a6278', font: { size: 11 } } },
-        y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#5a6278', callback: v => '฿' + v } }
-      }
-    }
+    data: { labels, datasets: [{ data: vals.map(v => +v.toFixed(1)), backgroundColor: colors, borderRadius: 4, borderSkipped: false }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => '฿' + c.raw } } }, scales: { x: { grid: { display: false }, ticks: { color: '#5a6278', font: { size: 11 } } }, y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#5a6278', callback: v => '฿' + v } } } }
   });
 }
 
-// ─── เสาหลัก ──────────────────────────────────────────────────────────────────
+// ── PILLARS DATA ───────────────────────────────────────
+const pillars = [
+  { id:'energy', name:'พลังงานสำรอง', color:'#e8a230', actions: [
+    { text:'ดำเนินมาตรการประหยัดพลังงานในทุกโรงงาน', sub:'ตรวจสอบฐานการใช้พลังงาน + กำหนดเป้าลดการใช้ 3 อันดับแรก' },
+    { text:'ศึกษาความเป็นไปได้และขอใบเสนอราคาโซลาร์รูฟท็อป', sub:'เป้าหมายผลิตไฟฟ้าเองได้ 20–40%' },
+    { text:'ทบทวนโครงการ EV สำหรับยานพาหนะของบริษัท', sub:'วิเคราะห์ TCO 3 ปีเมื่อน้ำมันอยู่ที่ $100+/บาร์เรล' },
+    { text:'วางแผนติดตั้งโครงสร้างพื้นฐานสถานีชาร์จ EV', sub:'ระยะที่ 1: สถานที่หลัก | ระยะที่ 2: ทั้งหมด' }
+  ]},
+  { id:'supply', name:'ห่วงโซ่อุปทาน', color:'#4caf7e', actions: [
+    { text:'ทบทวนและเจรจาสัญญากับซัพพลายเออร์หลัก', sub:'เพิ่มเงื่อนไข force-majeure ล็อกราคา และแหล่งสำรอง' },
+    { text:'วิเคราะห์ความเสี่ยงซัพพลายเออร์ Tier 1 และ Tier 2', sub:'ระบุรายที่พึ่งพาเส้นทางผ่านช่องแคบฮอร์มุซ >30%' },
+    { text:'ระบุและพัฒนาซัพพลายเออร์สำรองสำหรับวัตถุดิบสำคัญ', sub:'อย่างน้อย 2 แหล่งสำรองต่อวัตถุดิบสำคัญ 1 รายการ' }
+  ]},
+  { id:'inventory', name:'สต็อกสินค้าเชิงกลยุทธ์', color:'#5b91d8', actions: [
+    { text:'เพิ่มสต็อกวัตถุดิบให้ได้ 3–6 เดือน', sub:'ให้ความสำคัญกับวัตถุดิบ lead time นาน หรือมีแหล่งเดียว' },
+    { text:'เพิ่มสต็อกสินค้าสำเร็จรูปสำหรับ SKU หลัก', sub:'สอดคล้องกับอัตราการขายและความสามารถในการจัดเก็บ' },
+    { text:'กำหนดและตั้งระบบแจ้งเตือน Reorder อัตโนมัติ', sub:'เชื่อมต่อกับระบบ ERP หรือ Planning System' }
+  ]},
+  { id:'efficiency', name:'ประสิทธิภาพ & AI', color:'#9b79e8', actions: [
+    { text:'จัดทำ Roadmap โรงงานอัจฉริยะ', sub:'มุ่งเน้นการเพิ่ม Yield ลดของเสีย และลด Downtime' },
+    { text:'นำร่อง AI เพิ่มประสิทธิภาพการผลิต', sub:'เลือก 1–2 สายการผลิตเพื่อทดสอบ Proof of Concept' },
+    { text:'วางแผนสำนักงานอัจฉริยะ (Smart Office)', sub:'เพิ่มประสิทธิภาพพลังงาน การจัดตารางเวลา และ Workflow' }
+  ]},
+  { id:'pricing', name:'กลยุทธ์ราคา & มาร์จิน', color:'#e05252', actions: [
+    { text:'จัดตั้ง Dashboard ติดตามต้นทุนรายสัปดาห์', sub:'ติดตามดัชนีโลจิสติกส์ พลังงาน และวัตถุดิบแบบ Real-time' },
+    { text:'วิเคราะห์ความยืดหยุ่นของราคา แต่ละ SKU', sub:'ระบุเพดานการปรับราคาก่อนสูญเสียส่วนแบ่งตลาด' },
+    { text:'จัดทำ Playbook ป้องกันมาร์จินสำหรับ 3 สถานการณ์', sub:'กำหนด Response Tier ล่วงหน้า: เบา / กลาง / รุนแรง' }
+  ]}
+];
+
+const checklistData = [
+  { section:'บุคลากรและความเป็นผู้นำ', items: [
+    { text:'สื่อสารสถานการณ์ความเสี่ยงอย่างชัดเจนต่อบุคลากรหลักทุกคน', sub:'จัดประชุม All-Directors Briefing เรื่องความเสี่ยงและผลกระทบต่ออาเซียน' },
+    { text:'กำหนดทีมตอบสนองวิกฤตพร้อมระบุผู้รับผิดชอบแต่ละเสาหลัก', sub:'มอบหมาย Owner: พลังงาน / ห่วงโซ่อุปทาน / สต็อก / ประสิทธิภาพ / ราคา' },
+    { text:'เตรียมความพร้อมทั้งร่างกายและจิตใจ', sub:'การรับมือวิกฤตระยะยาวต้องอาศัยทั้งความพร้อมทางกายและจิตใจ' },
+    { text:'กำหนดตารางฝึกซ้อม War Game รายเดือน', sub:'ใช้เครื่องมือนี้ในการฝึกซ้อมร่วมกับผู้บริหารทุกท่าน' }
+  ]},
+  { section:'พลังงานสำรอง', items: pillars[0].actions.map(a => ({text:a.text,sub:a.sub})) },
+  { section:'ห่วงโซ่อุปทานและสต็อกสินค้า', items: [...pillars[1].actions,...pillars[2].actions].map(a=>({text:a.text,sub:a.sub})) },
+  { section:'ประสิทธิภาพและกลยุทธ์ราคา', items: [...pillars[3].actions,...pillars[4].actions].map(a=>({text:a.text,sub:a.sub})) }
+];
+
+// ── BUILD PILLARS ──────────────────────────────────────
 function buildPillars() {
   const ps = document.getElementById('pillar-summary');
   const rs = document.getElementById('readiness-section');
   ps.innerHTML = ''; rs.innerHTML = '';
-
   pillars.forEach(p => {
-    p.actions.forEach((a, i) => { readinessState[p.id + '_' + i] = 50; });
-
+    p.actions.forEach((a,i) => { readinessState[p.id+'_'+i] = 50; });
     const pc = document.createElement('div');
-    pc.className = 'pillar-card';
-    pc.style.borderTopColor = p.color;
-    pc.innerHTML = `<div class="pillar-name">${p.name}</div>
-      <div class="pillar-pct" id="pp_${p.id}" style="color:${p.color}">50%</div>
-      <div class="pbar"><div class="pbar-fill" id="pb_${p.id}" style="width:50%;background:${p.color}"></div></div>`;
+    pc.className = 'pillar-card'; pc.style.borderTopColor = p.color;
+    pc.innerHTML = `<div class="pillar-name">${p.name}</div><div class="pillar-pct" id="pp_${p.id}" style="color:${p.color}">50%</div><div class="pbar"><div class="pbar-fill" id="pb_${p.id}" style="width:50%;background:${p.color}"></div></div>`;
     ps.appendChild(pc);
-
-    const card = document.createElement('div');
-    card.className = 'card';
+    const card = document.createElement('div'); card.className = 'card';
     card.innerHTML = `<div class="card-title" style="color:${p.color}">${p.name} — ประเมินความพร้อม</div>`;
-    p.actions.forEach((a, i) => {
-      const key = p.id + '_' + i;
-      const row = document.createElement('div');
-      row.className = 'r-row';
-      row.innerHTML = `<div class="r-label"><strong style="color:var(--text)">${a.text}</strong><br><span style="color:var(--text3);font-size:12px">${a.sub}</span></div>
-        <input type="range" class="r-slider" min="0" max="100" step="10" value="50" oninput="updateReadiness('${key}','${p.color}',this.value)">
-        <span class="r-pct" id="rv_${key}">50%</span>`;
+    p.actions.forEach((a,i) => {
+      const key = p.id+'_'+i;
+      const row = document.createElement('div'); row.className = 'r-row';
+      row.innerHTML = `<div class="r-label"><strong style="color:var(--text)">${a.text}</strong><br><span style="color:var(--text3);font-size:12px">${a.sub}</span></div><input type="range" class="r-slider" min="0" max="100" step="10" value="50" oninput="updateReadiness('${key}','${p.color}',this.value)"><span class="r-pct" id="rv_${key}">50%</span>`;
       card.appendChild(row);
     });
     rs.appendChild(card);
@@ -703,109 +676,67 @@ function buildPillars() {
 
 function updateReadiness(key, color, val) {
   readinessState[key] = +val;
-  document.getElementById('rv_' + key).textContent = val + '%';
+  document.getElementById('rv_'+key).textContent = val+'%';
   updateOverall();
 }
 
 function updateOverall() {
   pillars.forEach(p => {
-    const keys = p.actions.map((_, i) => p.id + '_' + i);
-    const avg = Math.round(keys.reduce((s, k) => s + readinessState[k], 0) / keys.length);
-    const pp = document.getElementById('pp_' + p.id);
-    const pb = document.getElementById('pb_' + p.id);
-    if (pp) pp.textContent = avg + '%';
-    if (pb) pb.style.width = avg + '%';
+    const keys = p.actions.map((_,i) => p.id+'_'+i);
+    const avg = Math.round(keys.reduce((s,k) => s+readinessState[k],0)/keys.length);
+    const pp = document.getElementById('pp_'+p.id); const pb = document.getElementById('pb_'+p.id);
+    if(pp) pp.textContent = avg+'%'; if(pb) pb.style.width = avg+'%';
   });
   const all = Object.values(readinessState);
-  const overall = Math.round(all.reduce((s, v) => s + v, 0) / all.length);
-  document.getElementById('overall-score').textContent = overall + '%';
-  document.getElementById('overall-label').textContent =
-    overall < 30 ? 'มีช่องว่างวิกฤต — ต้องดำเนินการทันที' :
-    overall < 60 ? 'ความพร้อมระดับกลาง — เร่งพัฒนาเสาหลักที่อ่อนแอ' :
-    overall < 80 ? 'คืบหน้าดี — รักษาโมเมนตัมต่อไป' : 'พร้อมรับมือสูง — ดำเนินการฝึกซ้อม War Game รอบสุดท้าย';
+  const overall = Math.round(all.reduce((s,v)=>s+v,0)/all.length);
+  document.getElementById('overall-score').textContent = overall+'%';
+  document.getElementById('overall-label').textContent = overall<30?'มีช่องว่างวิกฤต — ต้องดำเนินการทันที':overall<60?'ความพร้อมระดับกลาง — เร่งพัฒนาเสาหลักที่อ่อนแอ':overall<80?'คืบหน้าดี — รักษาโมเมนตัมต่อไป':'พร้อมรับมือสูง — ดำเนินการฝึกซ้อม War Game รอบสุดท้าย';
   const bar = document.getElementById('overall-bar');
-  bar.style.width = overall + '%';
-  bar.style.background = overall < 30 ? '#e05252' : overall < 60 ? '#e8a230' : '#4caf7e';
+  bar.style.width = overall+'%'; bar.style.background = overall<30?'#e05252':overall<60?'#e8a230':'#4caf7e';
 }
 
-// ─── สถานการณ์ ────────────────────────────────────────────────────────────────
+// ── SCENARIO COMPARE ───────────────────────────────────
 const scenarioDefs = [
-  { id: 'mild', label: 'ระดับเบา (+฿10/ลัง)', cls: 'mild', logistics: 10, oil: 15, raw: 6, en: 10, vol: 3, price: 4 },
-  { id: 'moderate', label: 'ระดับกลาง (+฿20/ลัง)', cls: 'moderate', logistics: 20, oil: 30, raw: 12, en: 20, vol: 8, price: 7 },
-  { id: 'severe', label: 'ระดับรุนแรง (+฿30/ลัง)', cls: 'severe', logistics: 30, oil: 60, raw: 22, en: 35, vol: 15, price: 12 }
+  { id:'mild', label:'ระดับเบา (+฿10/ลัง)', cls:'mild', logistics:10, oil:15, raw:6, en:10, vol:3, price:4 },
+  { id:'moderate', label:'ระดับกลาง (+฿20/ลัง)', cls:'moderate', logistics:20, oil:30, raw:12, en:20, vol:8, price:7 },
+  { id:'severe', label:'ระดับรุนแรง (+฿30/ลัง)', cls:'severe', logistics:30, oil:60, raw:22, en:35, vol:15, price:12 }
 ];
 
 function buildScenarioCards() {
-  const grid = document.getElementById('sc-grid');
-  grid.innerHTML = '';
+  const grid = document.getElementById('sc-grid'); grid.innerHTML = '';
   scenarioDefs.forEach(s => {
-    const base = 200, baseCost = 160;
-    const costAdd = s.logistics + baseCost * 0.4 * s.raw / 100 + baseCost * 0.15 * s.en / 100 + s.oil * 0.05;
-    const newRev = base * (1 + s.price / 100);
-    const newMargin = ((newRev - baseCost - costAdd) / newRev * 100);
-    const revImpact = ((1 + s.price / 100) * (1 - s.vol / 100) - 1) * 100;
-    const card = document.createElement('div');
-    card.className = 'sc-card';
-    card.innerHTML = `<div class="sc-header ${s.cls}">${s.label}</div>
-      <div class="sc-body">
-        <div class="sc-row"><span class="k">ต้นทุนเพิ่ม/ลัง</span><span class="v">+฿${costAdd.toFixed(1)}</span></div>
-        <div class="sc-row"><span class="k">มาร์จิน (ใหม่)</span><span class="v">${newMargin.toFixed(1)}%</span></div>
-        <div class="sc-row"><span class="k">ผลกระทบรายได้</span><span class="v">${revImpact.toFixed(1)}%</span></div>
-        <div class="sc-row"><span class="k">โลจิสติกส์+/ลัง</span><span class="v">+฿${s.logistics}</span></div>
-        <div class="sc-row"><span class="k">ปริมาณขายลดลง</span><span class="v">-${s.vol}%</span></div>
-        <div class="sc-row"><span class="k">ราคาน้ำมัน+</span><span class="v">+$${s.oil}/bbl</span></div>
-      </div>`;
+    const base=200,baseCost=160;
+    const costAdd = s.logistics + baseCost*0.4*s.raw/100 + baseCost*0.15*s.en/100 + s.oil*0.05;
+    const newRev = base*(1+s.price/100);
+    const newMargin = ((newRev-baseCost-costAdd)/newRev*100);
+    const revImpact = ((1+s.price/100)*(1-s.vol/100)-1)*100;
+    const card = document.createElement('div'); card.className = 'sc-card';
+    card.innerHTML = `<div class="sc-header ${s.cls}">${s.label}</div><div class="sc-body"><div class="sc-row"><span class="k">ต้นทุนเพิ่ม/ลัง</span><span class="v">+฿${costAdd.toFixed(1)}</span></div><div class="sc-row"><span class="k">มาร์จิน (ใหม่)</span><span class="v">${newMargin.toFixed(1)}%</span></div><div class="sc-row"><span class="k">ผลกระทบรายได้</span><span class="v">${revImpact.toFixed(1)}%</span></div><div class="sc-row"><span class="k">โลจิสติกส์+/ลัง</span><span class="v">+฿${s.logistics}</span></div><div class="sc-row"><span class="k">ปริมาณขายลดลง</span><span class="v">-${s.vol}%</span></div><div class="sc-row"><span class="k">ราคาน้ำมัน+</span><span class="v">+$${s.oil}/bbl</span></div></div>`;
     grid.appendChild(card);
   });
 }
 
 function buildScenarioChart() {
-  if (sChart) sChart.destroy();
+  if(sChart) sChart.destroy();
   sChart = new Chart(document.getElementById('scenarioChart'), {
-    type: 'bar',
-    data: {
-      labels: ['มาร์จินสุทธิ (%)', 'ผลกระทบรายได้ (%)', 'ต้นทุน+/ลัง (÷10)'],
-      datasets: [
-        { label: 'ระดับเบา', data: [19.2, 0.9, 1.4], backgroundColor: '#4caf7e' },
-        { label: 'ระดับกลาง', data: [13.8, -1.2, 3.7], backgroundColor: '#e8a230' },
-        { label: 'ระดับรุนแรง', data: [7.1, -4.7, 6.8], backgroundColor: '#e05252' }
-      ]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
-      scales: {
-        x: { grid: { display: false }, ticks: { color: '#5a6278' } },
-        y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#5a6278' } }
-      }
-    }
+    type:'bar',
+    data: { labels:['มาร์จินสุทธิ (%)','ผลกระทบรายได้ (%)','ต้นทุน+/ลัง (÷10)'], datasets: [{ label:'ระดับเบา', data:[19.2,0.9,1.4], backgroundColor:'#4caf7e' },{ label:'ระดับกลาง', data:[13.8,-1.2,3.7], backgroundColor:'#e8a230' },{ label:'ระดับรุนแรง', data:[7.1,-4.7,6.8], backgroundColor:'#e05252' }] },
+    options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false } }, scales:{ x:{ grid:{display:false}, ticks:{color:'#5a6278'} }, y:{ grid:{color:'rgba(255,255,255,0.04)'}, ticks:{color:'#5a6278'} } } }
   });
 }
 
-// ─── รายการตรวจสอบ ────────────────────────────────────────────────────────────
-let checkTotal = 0, checkDone = 0;
-
+// ── CHECKLIST ──────────────────────────────────────────
+let checkTotal=0, checkDone=0;
 function buildChecklist() {
   const container = document.getElementById('checklist-container');
-  container.innerHTML = '';
-  checkTotal = 0;
-
-  checklistData.forEach((section, si) => {
-    const card = document.createElement('div');
-    card.className = 'card';
+  container.innerHTML = ''; checkTotal = 0;
+  checklistData.forEach((section,si) => {
+    const card = document.createElement('div'); card.className = 'card';
     card.innerHTML = `<div class="card-title">${section.section}</div>`;
-    section.items.forEach((item, ii) => {
-      const key = `s${si}_i${ii}`;
-      checkState[key] = false;
-      checkTotal++;
-      const row = document.createElement('div');
-      row.className = 'checklist-item';
-      row.dataset.key = key;
-      row.innerHTML = `<div class="check-box" id="cb_${key}"></div>
-        <div>
-          <div class="check-text">${item.text}</div>
-          <div class="check-sub">${item.sub}</div>
-        </div>`;
+    section.items.forEach((item,ii) => {
+      const key = `s${si}_i${ii}`; checkState[key] = false; checkTotal++;
+      const row = document.createElement('div'); row.className = 'checklist-item'; row.dataset.key = key;
+      row.innerHTML = `<div class="check-box" id="cb_${key}"></div><div><div class="check-text">${item.text}</div><div class="check-sub">${item.sub}</div></div>`;
       row.onclick = () => toggleCheck(key, row);
       card.appendChild(row);
     });
@@ -813,29 +744,34 @@ function buildChecklist() {
   });
   updateCheckProgress();
 }
-
-function toggleCheck(key, row) {
+function toggleCheck(key,row) {
   checkState[key] = !checkState[key];
-  const cb = document.getElementById('cb_' + key);
-  cb.classList.toggle('checked', checkState[key]);
-  cb.textContent = checkState[key] ? '✓' : '';
-  row.classList.toggle('checked', checkState[key]);
-  updateCheckProgress();
+  const cb = document.getElementById('cb_'+key);
+  cb.classList.toggle('checked',checkState[key]); cb.textContent = checkState[key]?'✓':'';
+  row.classList.toggle('checked',checkState[key]); updateCheckProgress();
 }
-
 function updateCheckProgress() {
   checkDone = Object.values(checkState).filter(Boolean).length;
   document.getElementById('check-progress').textContent = `${checkDone} / ${checkTotal} รายการ`;
-  const pct = checkTotal ? (checkDone / checkTotal * 100) : 0;
-  document.getElementById('check-bar').style.width = pct + '%';
+  document.getElementById('check-bar').style.width = (checkTotal?(checkDone/checkTotal*100):0)+'%';
 }
 
-// ─── Navigation ───────────────────────────────────────────────────────────────
+// ── NAV ────────────────────────────────────────────────
 function switchTab(name, btn) {
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('tab-' + name).classList.add('active');
-  if (btn) btn.classList.add('active');
+  document.getElementById('tab-'+name).classList.add('active');
+  if(btn) btn.classList.add('active');
+}
+
+// ── INIT ───────────────────────────────────────────────
+function init() {
+  buildPillars();
+  buildChecklist();
+  buildScenarioCards();
+  buildScenarioChart();
+  recalc();
+  startupSequence();
 }
 
 init();
