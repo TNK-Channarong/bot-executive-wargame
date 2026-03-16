@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>War Game Planner v2 — เปรียบเทียบต้นทุน ณ วันที่เลือก</title>
+<title>War Game Planner v3 — Supply Origin Engine</title>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Noto+Serif+Thai:wght@400;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
@@ -217,13 +217,49 @@ tr:hover td{background:var(--bg3);color:var(--text)}
   .main{padding:1rem}
   .compare-arrow{display:none}
 }
+/* ══ SUPPLY ORIGIN ENGINE ══ */
+.origin-card{background:linear-gradient(135deg,rgba(76,175,126,0.06),rgba(91,145,216,0.06));border:1px solid rgba(76,175,126,0.25);border-radius:14px;padding:1.5rem 2rem;margin-bottom:1.5rem}
+.origin-title{font-family:'Noto Serif Thai',serif;font-size:18px;font-weight:600;color:var(--green);margin-bottom:4px}
+.origin-sub{font-size:13px;color:var(--text2);margin-bottom:1.25rem;line-height:1.6}
+.sku-list{display:flex;flex-direction:column;gap:8px;margin-bottom:1rem}
+.sku-row{display:grid;grid-template-columns:2fr 1.8fr 0.8fr 0.8fr auto;gap:8px;align-items:center;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;transition:border-color 0.2s}
+.sku-row:hover{border-color:var(--border2)}
+@media(max-width:900px){.sku-row{grid-template-columns:1fr 1fr;gap:6px}}
+.sku-name-input{background:transparent;border:none;color:var(--text);font-family:'Sarabun',sans-serif;font-size:13px;font-weight:500;outline:none;width:100%}
+.sku-name-input::placeholder{color:var(--text3)}
+.origin-select{background:var(--bg4);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'Sarabun',sans-serif;font-size:13px;padding:7px 10px;outline:none;cursor:pointer;width:100%}
+.origin-select:focus{border-color:var(--accent)}
+.origin-select option{background:var(--bg3)}
+.pct-input{background:var(--bg4);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'Sarabun',sans-serif;font-size:13px;font-weight:600;padding:7px 10px;outline:none;text-align:right;width:100%}
+.pct-input:focus{border-color:var(--accent)}
+.sku-delete{background:none;border:none;color:var(--text3);cursor:pointer;font-size:16px;padding:4px 8px;border-radius:4px;transition:all 0.2s}
+.sku-delete:hover{color:var(--red);background:rgba(224,82,82,0.1)}
+.add-sku-btn{background:none;border:1px dashed var(--border2);border-radius:var(--radius-sm);color:var(--text3);font-family:'Sarabun',sans-serif;font-size:13px;padding:10px;cursor:pointer;width:100%;transition:all 0.2s;margin-bottom:1rem}
+.add-sku-btn:hover{border-color:var(--green);color:var(--green);background:rgba(76,175,126,0.05)}
+.origin-impact{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius);padding:1.25rem 1.5rem;margin-bottom:1.25rem;display:none}
+.origin-impact.visible{display:block}
+.origin-impact-title{font-size:12px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);margin-bottom:1rem}
+.origin-breakdown{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px;margin-bottom:1rem}
+.origin-item{background:var(--bg3);border-radius:var(--radius-sm);padding:12px 14px;border-left:3px solid;display:flex;flex-direction:column;gap:3px}
+.origin-item-name{font-size:13px;font-weight:600;color:var(--text)}
+.origin-item-pct{font-size:11px;color:var(--text3)}
+.origin-item-route{font-size:11px;color:var(--text3);margin-top:2px;line-height:1.5}
+.origin-item-impact{font-size:20px;font-weight:700;margin-top:4px}
+.origin-item-impact.red{color:var(--red)} .origin-item-impact.amber{color:var(--amber)} .origin-item-impact.green{color:var(--green)}
+.origin-risk-tag{display:inline-flex;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;margin-top:4px;width:fit-content}
+.origin-weighted-result{background:linear-gradient(135deg,rgba(201,168,76,0.1),rgba(232,162,48,0.05));border:1px solid rgba(201,168,76,0.3);border-radius:var(--radius-sm);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.origin-weighted-label{font-size:13px;color:var(--text2)}
+.origin-weighted-val{font-family:'Noto Serif Thai',serif;font-size:32px;font-weight:600;color:var(--accent2)}
+.origin-weighted-sub{font-size:11px;color:var(--text3);margin-top:2px}
+.pct-total-bar{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:var(--radius-sm);background:var(--bg3);font-size:12px;margin-bottom:12px}
+.pct-total-ok{color:var(--green)} .pct-total-warn{color:var(--amber)} .pct-total-err{color:var(--red)}
 </style>
 </head>
 <body>
 
 <!-- LOADING -->
 <div id="loading-overlay">
-  <div class="loading-logo">⚔ War Game Planner v2</div>
+  <div class="loading-logo">⚔ War Game Planner v3</div>
   <div class="loading-sub">กำลังวิเคราะห์สถานการณ์โลกปัจจุบันด้วย AI</div>
   <div class="loading-steps">
     <div class="loading-step" id="step-1"><span class="step-icon">🌐</span>ดึงข้อมูลราคาน้ำมันและโลจิสติกส์ล่าสุด</div>
@@ -277,6 +313,57 @@ tr:hover td{background:var(--bg3);color:var(--text)}
       <button class="analyze-btn" id="analyze-btn" onclick="runBaselineAnalysis()">
         🔍 วิเคราะห์เปรียบเทียบ
       </button>
+    </div>
+  </div>
+
+  <!-- ══ SUPPLY ORIGIN ENGINE ══ -->
+  <div class="origin-card">
+    <div class="origin-title">🗺 Supply Origin Engine — ต้นทางสินค้า</div>
+    <div class="origin-sub">
+      ระบุว่าสินค้าแต่ละประเภทมาจากไหน — ระบบจะคำนวณผลกระทบต้นทุนแบบ <strong style="color:var(--accent2)">Weighted Average</strong> ตามเส้นทางขนส่งจริงของแต่ละแหล่ง ไม่ใช่ค่าเฉลี่ยกลางๆ
+    </div>
+
+    <!-- Column Headers -->
+    <div style="display:grid;grid-template-columns:2fr 1.8fr 0.8fr 0.8fr auto;gap:8px;padding:0 12px;margin-bottom:6px">
+      <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--text3)">ชื่อกลุ่มสินค้า / SKU</div>
+      <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--text3)">แหล่งที่มา / เมืองท่า</div>
+      <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--text3);text-align:right">สัดส่วน %</div>
+      <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--text3);text-align:right">ต้นทุน/ลัง ฿</div>
+      <div></div>
+    </div>
+
+    <div class="sku-list" id="sku-list"></div>
+
+    <div class="pct-total-bar" id="pct-total-bar">
+      <span id="pct-total-icon">⚖</span>
+      <span id="pct-total-text" style="flex:1">รวมสัดส่วน: 0% — กรุณาให้รวมได้ 100%</span>
+      <span id="pct-total-val" style="font-weight:700">0%</span>
+    </div>
+
+    <button class="add-sku-btn" onclick="addSKU()">+ เพิ่มกลุ่มสินค้า / แหล่งที่มา</button>
+
+    <button class="analyze-btn" style="width:100%" onclick="calcOriginImpact()">
+      🗺 คำนวณผลกระทบตามต้นทางสินค้า
+    </button>
+  </div>
+
+  <!-- ══ ORIGIN IMPACT RESULT ══ -->
+  <div class="origin-impact" id="origin-impact">
+    <div class="origin-impact-title">ผลกระทบต้นทุนแยกตามต้นทางสินค้า</div>
+    <div class="origin-breakdown" id="origin-breakdown"></div>
+    <div class="origin-weighted-result">
+      <div>
+        <div class="origin-weighted-label">ต้นทุนเฉลี่ยถ่วงน้ำหนักที่เพิ่มขึ้น/ลัง (Weighted Average)</div>
+        <div class="origin-weighted-val" id="origin-weighted-val">—</div>
+        <div class="origin-weighted-sub" id="origin-weighted-sub">คำนวณจากสัดส่วนและเส้นทางขนส่งจริงของแต่ละแหล่ง</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:11px;color:var(--text3);margin-bottom:4px">เทียบกับ Slider ปัจจุบัน</div>
+        <div style="font-size:16px;font-weight:700" id="origin-vs-slider">—</div>
+        <button style="margin-top:8px;background:var(--accent);border:none;border-radius:var(--radius-sm);color:#000;font-family:'Sarabun',sans-serif;font-size:12px;font-weight:700;padding:6px 14px;cursor:pointer" onclick="applyOriginToSlider()">
+          ใช้ค่านี้ใน Simulator
+        </button>
+      </div>
     </div>
   </div>
 
@@ -434,7 +521,7 @@ tr:hover td{background:var(--bg3);color:var(--text)}
   </div>
 
 </main>
-<footer class="footer">War Game Planner v2 · เปรียบเทียบต้นทุน Baseline vs ปัจจุบัน · วิเคราะห์โดย Claude AI · สำหรับใช้ภายในองค์กรเท่านั้น</footer>
+<footer class="footer">War Game Planner v3 · Supply Origin Engine · Baseline vs ปัจจุบัน · วิเคราะห์โดย Claude AI · สำหรับใช้ภายในองค์กรเท่านั้น</footer>
 
 <script>
 // ── STATE ──────────────────────────────────────────────
@@ -950,13 +1037,308 @@ function updateCheckProgress(){
   document.getElementById('check-progress').textContent=`${checkDone} / ${checkTotal} รายการ`;
   document.getElementById('check-bar').style.width=(checkTotal?(checkDone/checkTotal*100):0)+'%';
 }
-function switchTab(name,btn){
-  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
-  document.getElementById('tab-'+name).classList.add('active');
-  if(btn)btn.classList.add('active');
+// ══════════════════════════════════════════════════
+// SUPPLY ORIGIN ENGINE
+// ══════════════════════════════════════════════════
+
+// Origin definitions — logistics multiplier vs "no-war baseline"
+// multiplier = how much MORE the logistics cost increases vs average
+// due to war/Hormuz closure, route dependency, surcharges
+const ORIGINS = {
+  'china-shanghai': {
+    label: 'จีน — เซี่ยงไฮ้ (Shanghai)',
+    flag: '🇨🇳',
+    route: 'Pacific / South China Sea',
+    logisticsMult: 1.0,   // minimal Hormuz exposure
+    rawmatMult: 0.7,      // China supply intact
+    energyMult: 0.8,
+    riskLevel: 'ต่ำ',
+    riskColor: 'var(--green)',
+    riskBg: 'rgba(76,175,126,0.15)',
+    borderColor: '#4caf7e',
+    routeNote: 'เส้นทาง Pacific ไม่ผ่านฮอร์มุซ กระทบน้อย',
+    surcharge: 'ค่าขนส่งเพิ่มปานกลาง ~฿8-12/ลัง'
+  },
+  'china-guangzhou': {
+    label: 'จีน — กวางโจว (Guangzhou)',
+    flag: '🇨🇳',
+    route: 'South China Sea / Malacca',
+    logisticsMult: 1.0,
+    rawmatMult: 0.7,
+    energyMult: 0.8,
+    riskLevel: 'ต่ำ',
+    riskColor: 'var(--green)',
+    riskBg: 'rgba(76,175,126,0.15)',
+    borderColor: '#4caf7e',
+    routeNote: 'เส้นทาง South China Sea ไม่ผ่านฮอร์มุซ',
+    surcharge: 'ค่าขนส่งเพิ่ม ~฿8-12/ลัง'
+  },
+  'china-tianjin': {
+    label: 'จีน — เทียนจิน (Tianjin)',
+    flag: '🇨🇳',
+    route: 'Pacific / Yellow Sea',
+    logisticsMult: 0.9,
+    rawmatMult: 0.7,
+    energyMult: 0.8,
+    riskLevel: 'ต่ำ',
+    riskColor: 'var(--green)',
+    riskBg: 'rgba(76,175,126,0.15)',
+    borderColor: '#4caf7e',
+    routeNote: 'เส้นทาง Pacific ไม่ผ่านฮอร์มุซ กระทบน้อยที่สุด',
+    surcharge: 'ค่าขนส่งเพิ่ม ~฿6-10/ลัง'
+  },
+  'middle-east': {
+    label: 'ตะวันออกกลาง / อ่าวเปอร์เซีย',
+    flag: '⚠️',
+    route: 'Strait of Hormuz (CLOSED)',
+    logisticsMult: 3.5,   // Hormuz closed, massive surcharge
+    rawmatMult: 2.5,
+    energyMult: 3.0,
+    riskLevel: 'วิกฤต',
+    riskColor: 'var(--red)',
+    riskBg: 'rgba(224,82,82,0.15)',
+    borderColor: '#e05252',
+    routeNote: 'ช่องแคบฮอร์มุซปิด — ต้องอ้อม Cape of Good Hope +14 วัน',
+    surcharge: 'War Risk Surcharge $1,500/TEU + Emergency Bunker $200/TEU'
+  },
+  'india': {
+    label: 'อินเดีย — มุมไบ / เจนไน',
+    flag: '🇮🇳',
+    route: 'Indian Ocean / Malacca',
+    logisticsMult: 1.8,
+    rawmatMult: 1.2,
+    energyMult: 1.5,
+    riskLevel: 'ปานกลาง',
+    riskColor: 'var(--amber)',
+    riskBg: 'rgba(232,162,48,0.15)',
+    borderColor: '#e8a230',
+    routeNote: 'ใกล้โซนสงคราม แต่ไม่ผ่านฮอร์มุซโดยตรง',
+    surcharge: 'War Risk Premium เพิ่ม ~$300/TEU'
+  },
+  'europe': {
+    label: 'ยุโรป — Rotterdam / Hamburg',
+    flag: '🇪🇺',
+    route: 'Suez Canal / Indian Ocean',
+    logisticsMult: 2.2,
+    rawmatMult: 1.4,
+    energyMult: 2.0,
+    riskLevel: 'สูง',
+    riskColor: 'var(--red)',
+    riskBg: 'rgba(224,82,82,0.12)',
+    borderColor: '#e05252',
+    routeNote: 'เส้นทาง Suez ผ่านทะเลแดง — กระทบจากสงคราม',
+    surcharge: 'Suez surcharge + ค่าน้ำมันเรือสูงขึ้น ~$400/TEU'
+  },
+  'domestic': {
+    label: 'ผลิตในประเทศ (ไทย)',
+    flag: '🇹🇭',
+    route: 'ไม่มีการขนส่งระหว่างประเทศ',
+    logisticsMult: 0.2,   // only domestic transport affected
+    rawmatMult: 1.1,      // some imported raw materials still affected
+    energyMult: 1.3,      // domestic energy cost still rises
+    riskLevel: 'ต่ำ',
+    riskColor: 'var(--green)',
+    riskBg: 'rgba(76,175,126,0.15)',
+    borderColor: '#4caf7e',
+    routeNote: 'ไม่ผ่านเส้นทางทะเลระหว่างประเทศ กระทบน้อยที่สุด',
+    surcharge: 'กระทบเฉพาะต้นทุนพลังงานและวัตถุดิบนำเข้า'
+  },
+  'asean': {
+    label: 'อาเซียน — เวียดนาม / มาเลเซีย',
+    flag: '🌏',
+    route: 'South China Sea / Malacca',
+    logisticsMult: 0.8,
+    rawmatMult: 0.9,
+    energyMult: 1.1,
+    riskLevel: 'ต่ำ-ปานกลาง',
+    riskColor: 'var(--green)',
+    riskBg: 'rgba(76,175,126,0.12)',
+    borderColor: '#4caf7e',
+    routeNote: 'เส้นทางระยะสั้น ไม่ผ่านฮอร์มุซ',
+    surcharge: 'ค่าขนส่งเพิ่มน้อย ~฿5-8/ลัง'
+  },
+  'usa': {
+    label: 'สหรัฐฯ — Los Angeles / Houston',
+    flag: '🇺🇸',
+    route: 'Pacific Ocean',
+    logisticsMult: 1.1,
+    rawmatMult: 1.0,
+    energyMult: 0.9,
+    riskLevel: 'ต่ำ',
+    riskColor: 'var(--green)',
+    riskBg: 'rgba(76,175,126,0.15)',
+    borderColor: '#4caf7e',
+    routeNote: 'เส้นทาง Pacific ไม่ผ่านฮอร์มุซ',
+    surcharge: 'ค่าขนส่งเพิ่มเล็กน้อย ~฿8-12/ลัง'
+  }
+};
+
+let skuRows = [];
+let skuIdCounter = 0;
+let weightedLogisticsResult = null;
+
+function addSKU(name='', originKey='china-shanghai', pct=0, costPerCase=0) {
+  const id = 'sku_' + (++skuIdCounter);
+  skuRows.push({ id, name, originKey, pct, costPerCase });
+  renderSKUList();
 }
-function init(){buildPillars();buildChecklist();buildScenarioCards();buildScenarioChart();recalc();startupSequence()}
+
+function removeSKU(id) {
+  skuRows = skuRows.filter(r => r.id !== id);
+  renderSKUList();
+}
+
+function renderSKUList() {
+  const list = document.getElementById('sku-list');
+  list.innerHTML = '';
+
+  skuRows.forEach((row, idx) => {
+    const div = document.createElement('div');
+    div.className = 'sku-row';
+    const opts = Object.entries(ORIGINS).map(([k, v]) =>
+      '<option value="' + k + '"' + (k === row.originKey ? ' selected' : '') + '>' + v.flag + ' ' + v.label + '</option>'
+    ).join('');
+
+    div.innerHTML =
+      '<input class="sku-name-input" type="text" placeholder="เช่น สินค้า FMCG กลุ่ม A" value="' + (row.name||'') + '" oninput="skuRows['+idx+'].name=this.value">' +
+      '<select class="origin-select" onchange="skuRows['+idx+'].originKey=this.value;renderSKUList()">' + opts + '</select>' +
+      '<input class="pct-input" type="number" min="0" max="100" step="5" placeholder="%" value="' + (row.pct||'') + '" oninput="skuRows['+idx+'].pct=+this.value;updatePctTotal()">' +
+      '<input class="pct-input" type="number" min="0" step="1" placeholder="฿" value="' + (row.costPerCase||'') + '" oninput="skuRows['+idx+'].costPerCase=+this.value">' +
+      '<button class="sku-delete" onclick="removeSKU(\'' + row.id + '\')" title="ลบ">✕</button>';
+    list.appendChild(div);
+  });
+
+  updatePctTotal();
+}
+
+function updatePctTotal() {
+  const total = skuRows.reduce((s, r) => s + (+r.pct || 0), 0);
+  const bar = document.getElementById('pct-total-bar');
+  const txt = document.getElementById('pct-total-text');
+  const val = document.getElementById('pct-total-val');
+  val.textContent = total + '%';
+  if (total === 100) {
+    bar.className = 'pct-total-bar';
+    txt.innerHTML = '<span class="pct-total-ok">✅ ครบ 100% — พร้อมคำนวณ</span>';
+    val.className = 'pct-total-ok';
+  } else if (total > 100) {
+    txt.innerHTML = '<span class="pct-total-err">⚠️ เกิน 100% — กรุณาปรับสัดส่วน</span>';
+    val.className = 'pct-total-err';
+  } else {
+    txt.innerHTML = '<span class="pct-total-warn">รวม ' + total + '% — ยังขาดอยู่ ' + (100 - total) + '%</span>';
+    val.className = 'pct-total-warn';
+  }
+}
+
+function calcOriginImpact() {
+  const total = skuRows.reduce((s, r) => s + (+r.pct || 0), 0);
+  if (total !== 100) {
+    alert('กรุณาให้สัดส่วนรวมเป็น 100% ก่อนคำนวณ (ตอนนี้ = ' + total + '%)');
+    return;
+  }
+  if (skuRows.length === 0) {
+    alert('กรุณาเพิ่มกลุ่มสินค้าอย่างน้อย 1 รายการ');
+    return;
+  }
+
+  // Get current slider values as base shock
+  const oilShock    = +document.getElementById('s-oil').value;
+  const rawShock    = +document.getElementById('s-rawmat').value;
+  const energyShock = +document.getElementById('s-energy').value;
+  const baseLogistics = +document.getElementById('s-logistics').value;
+
+  // Calculate per-origin impact
+  const results = skuRows.map(row => {
+    const o = ORIGINS[row.originKey];
+    const pct = +row.pct / 100;
+    const baseCostCase = +row.costPerCase || (baselineData.cost || 160);
+
+    // Adjust each cost component by origin multiplier
+    const logAdd   = baseLogistics * o.logisticsMult;
+    const rawAdd   = baseCostCase * 0.4 * rawShock / 100 * o.rawmatMult;
+    const enAdd    = baseCostCase * 0.15 * energyShock / 100 * o.energyMult;
+    const oilAdd   = oilShock * 0.05 * o.logisticsMult;
+    const totalAdd = logAdd + rawAdd + enAdd + oilAdd;
+
+    return {
+      ...row,
+      origin: o,
+      logAdd: +logAdd.toFixed(1),
+      rawAdd: +rawAdd.toFixed(1),
+      enAdd:  +enAdd.toFixed(1),
+      oilAdd: +oilAdd.toFixed(1),
+      totalAdd: +totalAdd.toFixed(1),
+      weightedAdd: +(totalAdd * pct).toFixed(2)
+    };
+  });
+
+  // Weighted average
+  const weightedTotal = results.reduce((s, r) => s + r.weightedAdd, 0);
+  weightedLogisticsResult = +weightedTotal.toFixed(1);
+
+  // Render breakdown cards
+  const breakdown = document.getElementById('origin-breakdown');
+  breakdown.innerHTML = results.map(r => {
+    const impactCls = r.totalAdd > 35 ? 'red' : r.totalAdd > 20 ? 'amber' : 'green';
+    return '<div class="origin-item" style="border-left-color:' + r.origin.borderColor + '">' +
+      '<div class="origin-item-name">' + r.origin.flag + ' ' + (r.name || r.origin.label) + '</div>' +
+      '<div class="origin-item-pct">สัดส่วน ' + r.pct + '% | ต้นทุน ฿' + (r.costPerCase||baselineData.cost) + '/ลัง</div>' +
+      '<div class="origin-item-route">📍 ' + r.origin.routeNote + '</div>' +
+      '<div class="origin-item-route" style="color:var(--text3)">💸 ' + r.origin.surcharge + '</div>' +
+      '<div class="origin-item-impact ' + impactCls + '">+฿' + r.totalAdd + '/ลัง</div>' +
+      '<div style="font-size:11px;color:var(--text3)">Logistics +฿' + r.logAdd + ' | วัตถุดิบ +฿' + r.rawAdd + ' | พลังงาน +฿' + r.enAdd + '</div>' +
+      '<div class="origin-risk-tag" style="background:' + r.origin.riskBg + ';color:' + r.origin.riskColor + '">ความเสี่ยง: ' + r.origin.riskLevel + '</div>' +
+    '</div>';
+  }).join('');
+
+  // Weighted result display
+  const currentSliderLogistics = +document.getElementById('s-logistics').value;
+  const diff = +(weightedLogisticsResult - currentSliderLogistics).toFixed(1);
+  const diffTxt = diff > 0 ? '<span style="color:var(--red)">+฿' + diff + ' สูงกว่า Slider</span>'
+    : diff < 0 ? '<span style="color:var(--green)">฿' + diff + ' ต่ำกว่า Slider</span>'
+    : '<span style="color:var(--green)">ตรงกับ Slider</span>';
+
+  document.getElementById('origin-weighted-val').textContent = '+฿' + weightedLogisticsResult + '/ลัง';
+  document.getElementById('origin-weighted-sub').textContent =
+    'ถ่วงน้ำหนักจาก ' + results.length + ' แหล่ง | ' +
+    results.map(r => r.origin.flag + ' ' + r.pct + '%').join(', ');
+  document.getElementById('origin-vs-slider').innerHTML = diffTxt;
+  document.getElementById('origin-impact').classList.add('visible');
+
+  // Scroll to result
+  document.getElementById('origin-impact').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function applyOriginToSlider() {
+  if (weightedLogisticsResult === null) return;
+  document.getElementById('s-logistics').value = Math.min(60, weightedLogisticsResult);
+  recalc();
+  // Switch to simulator tab
+  switchTab('scenario', document.querySelector('.nav-btn'));
+  document.querySelectorAll('.nav-btn')[0].classList.add('active');
+  document.getElementById('tab-scenario').classList.add('active');
+
+  // Flash the slider to highlight change
+  const slider = document.getElementById('s-logistics');
+  slider.style.transition = 'all 0.3s';
+  slider.style.accentColor = 'var(--green)';
+  setTimeout(() => { slider.style.accentColor = ''; }, 2000);
+}
+
+// Initialise with default SKUs
+function initDefaultSKUs() {
+  addSKU('สินค้าสำเร็จรูป — นำเข้าจากจีน', 'china-shanghai', 60, 160);
+  addSKU('สินค้าสำเร็จรูป — ผลิตในไทย', 'domestic', 30, 140);
+  addSKU('สินค้าสำเร็จรูป — ซัพพลายเออร์ในประเทศ', 'asean', 10, 150);
+}
+
+function switchTab(name, btn) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  if(btn) btn.classList.add('active');
+}
+function init(){buildPillars();buildChecklist();buildScenarioCards();buildScenarioChart();initDefaultSKUs();recalc();startupSequence()}
 init();
 </script>
 </body>
