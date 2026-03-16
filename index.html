@@ -3,159 +3,149 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>War Game Planner v3 — Supply Origin Engine</title>
+<title>War Game Planner v3</title>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Noto+Serif+Thai:wght@400;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
-:root {
-  --bg:#0d0f14; --bg2:#13161e; --bg3:#1a1e28; --bg4:#222736;
-  --border:rgba(255,255,255,0.07); --border2:rgba(255,255,255,0.13);
-  --text:#e8eaf0; --text2:#9098b0; --text3:#5a6278;
-  --accent:#c9a84c; --accent2:#e8c96a;
-  --red:#e05252; --amber:#e8a230; --green:#4caf7e; --blue:#5b91d8;
-  --purple:#9b79e8; --radius:10px; --radius-sm:6px;
+:root{
+  --bg:#0d0f14;--bg2:#13161e;--bg3:#1a1e28;--bg4:#222736;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
+  --text:#e8eaf0;--text2:#9098b0;--text3:#5a6278;
+  --accent:#c9a84c;--accent2:#e8c96a;
+  --red:#e05252;--amber:#e8a230;--green:#4caf7e;--blue:#5b91d8;--purple:#9b79e8;
+  --radius:10px;--radius-sm:6px;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
 body{background:var(--bg);color:var(--text);font-family:'Sarabun',sans-serif;font-size:15px;min-height:100vh;line-height:1.6}
-
-/* LOADING */
 #loading-overlay{position:fixed;inset:0;background:#0d0f14;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px}
 .loading-logo{font-family:'Noto Serif Thai',serif;font-size:28px;color:var(--accent2);font-weight:600}
 .loading-sub{font-size:14px;color:var(--text3);text-align:center}
-.loading-steps{display:flex;flex-direction:column;gap:10px;width:380px}
-.loading-step{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:var(--radius-sm);background:var(--bg2);border:1px solid var(--border);font-size:13px;color:var(--text3);transition:all 0.3s}
-.loading-step.active{border-color:var(--accent);color:var(--text2);background:var(--bg3)}
-.loading-step.done{border-color:var(--green);color:var(--green);background:rgba(76,175,126,0.08)}
-.loading-step.error{border-color:var(--red);color:var(--red)}
-.step-icon{font-size:16px;width:22px;text-align:center}
-.loading-bar-wrap{width:380px;height:4px;background:var(--bg4);border-radius:2px;overflow:hidden}
-.loading-bar{height:100%;background:var(--accent);border-radius:2px;width:0%;transition:width 0.6s ease}
-
-/* HEADER */
+.loading-steps{display:flex;flex-direction:column;gap:10px;width:400px}
+.lstep{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:var(--radius-sm);background:var(--bg2);border:1px solid var(--border);font-size:13px;color:var(--text3);transition:all 0.3s}
+.lstep.active{border-color:var(--accent);color:var(--text2);background:var(--bg3)}
+.lstep.done{border-color:var(--green);color:var(--green);background:rgba(76,175,126,0.08)}
+.lstep.error{border-color:var(--red);color:var(--red)}
+.stepico{font-size:16px;width:22px;text-align:center}
+.lbar-wrap{width:400px;height:4px;background:var(--bg4);border-radius:2px;overflow:hidden}
+.lbar{height:100%;background:var(--accent);border-radius:2px;width:0%;transition:width 0.6s ease}
 .header{background:linear-gradient(135deg,#0d0f14,#14182a);border-bottom:1px solid var(--border2);padding:0 2rem;position:sticky;top:0;z-index:100}
 .header-inner{max-width:1280px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:68px}
 .logo{display:flex;align-items:center;gap:12px}
 .logo-icon{width:38px;height:38px;background:linear-gradient(135deg,var(--accent),#a07830);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px}
 .logo-text{font-family:'Noto Serif Thai',serif;font-size:17px;color:var(--accent2);font-weight:600}
 .logo-sub{font-size:11px;color:var(--text3);margin-top:2px}
-.logo-ai-badge{display:inline-flex;align-items:center;gap:4px;background:rgba(91,145,216,0.15);border:1px solid rgba(91,145,216,0.3);color:var(--blue);font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;margin-left:8px}
+.ai-badge{display:inline-flex;align-items:center;gap:4px;background:rgba(91,145,216,0.15);border:1px solid rgba(91,145,216,0.3);color:var(--blue);font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;margin-left:8px}
 .nav{display:flex;gap:4px}
-.nav-btn{background:none;border:none;color:var(--text2);font-family:'Sarabun',sans-serif;font-size:13px;font-weight:500;padding:8px 14px;cursor:pointer;border-radius:var(--radius-sm);transition:all 0.2s;position:relative}
-.nav-btn:hover{color:var(--text);background:var(--bg3)}
-.nav-btn.active{color:var(--accent2);background:rgba(201,168,76,0.1)}
-.nav-btn.active::after{content:'';position:absolute;bottom:-1px;left:50%;transform:translateX(-50%);width:40px;height:2px;background:var(--accent);border-radius:1px}
-
+.nbtn{background:none;border:none;color:var(--text2);font-family:'Sarabun',sans-serif;font-size:13px;font-weight:500;padding:8px 14px;cursor:pointer;border-radius:var(--radius-sm);transition:all 0.2s;position:relative}
+.nbtn:hover{color:var(--text);background:var(--bg3)}
+.nbtn.active{color:var(--accent2);background:rgba(201,168,76,0.1)}
+.nbtn.active::after{content:'';position:absolute;bottom:-1px;left:50%;transform:translateX(-50%);width:40px;height:2px;background:var(--accent);border-radius:1px}
 .main{max-width:1280px;margin:0 auto;padding:2rem}
-.panel{display:none}
-.panel.active{display:block;animation:fadeIn 0.3s ease}
+.panel{display:none}.panel.active{display:block;animation:fadeIn 0.3s ease}
 @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
-
-/* ══ BASELINE SETUP CARD ══ */
-.baseline-card{
-  background:linear-gradient(135deg,rgba(155,121,232,0.08),rgba(201,168,76,0.06));
-  border:1px solid rgba(155,121,232,0.25);
-  border-radius:14px;padding:1.5rem 2rem;margin-bottom:1.5rem;
-}
-.baseline-title{font-family:'Noto Serif Thai',serif;font-size:18px;font-weight:600;color:var(--accent2);margin-bottom:4px}
-.baseline-sub{font-size:13px;color:var(--text2);margin-bottom:1.25rem}
-.baseline-grid{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:12px;align-items:end}
-@media(max-width:800px){.baseline-grid{grid-template-columns:1fr 1fr}}
-.input-group{display:flex;flex-direction:column;gap:6px}
-.input-label{font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3)}
-.input-field{
-  background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);
-  color:var(--text);font-family:'Sarabun',sans-serif;font-size:14px;font-weight:500;
-  padding:10px 14px;outline:none;transition:border-color 0.2s;width:100%
-}
-.input-field:focus{border-color:var(--accent)}
-.input-field::placeholder{color:var(--text3)}
-.analyze-btn{
-  background:linear-gradient(135deg,var(--accent),#a07830);
-  border:none;border-radius:var(--radius-sm);color:#000;
-  font-family:'Sarabun',sans-serif;font-size:14px;font-weight:700;
-  padding:10px 24px;cursor:pointer;transition:all 0.2s;white-space:nowrap;height:42px
-}
-.analyze-btn:hover{filter:brightness(1.1);transform:translateY(-1px)}
-.analyze-btn:disabled{opacity:0.5;cursor:not-allowed;transform:none}
-
-/* ══ COMPARISON HERO ══ */
-.compare-hero{
-  display:grid;grid-template-columns:1fr auto 1fr;
-  gap:1rem;align-items:stretch;margin-bottom:1.5rem
-}
-@media(max-width:700px){.compare-hero{grid-template-columns:1fr}}
-.compare-col{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem 1.5rem}
-.compare-col.baseline-col{border-color:rgba(91,145,216,0.3);background:rgba(91,145,216,0.05)}
-.compare-col.current-col{border-color:rgba(232,162,48,0.3);background:rgba(232,162,48,0.05)}
-.compare-arrow{display:flex;align-items:center;justify-content:center;font-size:28px;color:var(--text3);padding:0 0.5rem}
-.col-tag{font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px}
-.col-tag.blue{color:var(--blue)} .col-tag.amber{color:var(--amber)}
-.col-date{font-family:'Noto Serif Thai',serif;font-size:16px;font-weight:600;margin-bottom:12px}
-.col-rows{}
-.col-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px}
-.col-row:last-child{border-bottom:none}
-.col-row-key{color:var(--text3)}
-.col-row-val{font-weight:600;color:var(--text)}
-.col-row-val.up{color:var(--red)}
-.col-row-val.down{color:var(--green)}
-
-/* ══ DELTA SUMMARY BAR ══ */
-.delta-bar{
-  background:var(--bg2);border:1px solid var(--border2);
-  border-radius:var(--radius);padding:1.25rem 1.5rem;
-  margin-bottom:1.5rem;display:none
-}
-.delta-bar.visible{display:block}
-.delta-title{font-size:12px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);margin-bottom:1rem}
-.delta-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
-.delta-cell{background:var(--bg3);border-radius:var(--radius-sm);padding:12px 14px;border:1px solid var(--border)}
-.delta-cell-label{font-size:11px;color:var(--text3);margin-bottom:4px}
-.delta-cell-base{font-size:12px;color:var(--text3);margin-bottom:2px}
-.delta-cell-now{font-size:12px;color:var(--text2);margin-bottom:6px}
-.delta-cell-change{font-size:20px;font-weight:700}
-.delta-cell-change.up{color:var(--red)}
-.delta-cell-change.down{color:var(--green)}
-.delta-cell-change.neutral{color:var(--text2)}
-
+/* BASELINE CARD */
+.bcard{background:linear-gradient(135deg,rgba(155,121,232,0.08),rgba(201,168,76,0.06));border:1px solid rgba(155,121,232,0.25);border-radius:14px;padding:1.5rem 2rem;margin-bottom:1.25rem}
+.bcard-title{font-family:'Noto Serif Thai',serif;font-size:18px;font-weight:600;color:var(--accent2);margin-bottom:4px}
+.bcard-sub{font-size:13px;color:var(--text2);margin-bottom:1.25rem}
+.bgrid{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:12px;align-items:end}
+@media(max-width:800px){.bgrid{grid-template-columns:1fr 1fr}}
+.igroup{display:flex;flex-direction:column;gap:6px}
+.ilabel{font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3)}
+.ifield{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'Sarabun',sans-serif;font-size:14px;font-weight:500;padding:10px 14px;outline:none;transition:border-color 0.2s;width:100%}
+.ifield:focus{border-color:var(--accent)}
+.abtn{background:linear-gradient(135deg,var(--accent),#a07830);border:none;border-radius:var(--radius-sm);color:#000;font-family:'Sarabun',sans-serif;font-size:14px;font-weight:700;padding:10px 24px;cursor:pointer;transition:all 0.2s;white-space:nowrap;height:42px}
+.abtn:hover{filter:brightness(1.1);transform:translateY(-1px)}
+.abtn:disabled{opacity:0.5;cursor:not-allowed;transform:none}
+/* SUPPLY SOURCE */
+.scard{background:linear-gradient(135deg,rgba(76,175,126,0.06),rgba(91,145,216,0.06));border:1px solid rgba(76,175,126,0.25);border-radius:14px;padding:1.5rem 2rem;margin-bottom:1.25rem}
+.scard-title{font-family:'Noto Serif Thai',serif;font-size:18px;font-weight:600;color:var(--green);margin-bottom:4px}
+.scard-sub{font-size:13px;color:var(--text2);margin-bottom:1.25rem;line-height:1.7}
+.srows{display:flex;flex-direction:column;gap:8px}
+.srow{display:grid;grid-template-columns:2fr 160px 130px;gap:12px;align-items:center;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 16px;transition:border-color 0.2s}
+.srow:hover{border-color:var(--border2)}
+@media(max-width:800px){.srow{grid-template-columns:1fr 100px}}
+.sinfo{display:flex;align-items:center;gap:12px}
+.sflag{font-size:22px;width:32px;text-align:center;flex-shrink:0}
+.sname{font-size:13px;font-weight:600;color:var(--text)}
+.sdesc{font-size:11px;color:var(--text3);margin-top:2px;line-height:1.4}
+.sports{margin-top:3px}
+.sport{display:inline-block;font-size:10px;font-weight:600;padding:1px 6px;border-radius:3px;margin-right:3px;background:rgba(91,145,216,0.12);color:var(--blue);border:1px solid rgba(91,145,216,0.2)}
+.sport.red{background:rgba(224,82,82,0.12);color:var(--red);border-color:rgba(224,82,82,0.2)}
+.sport.green{background:rgba(76,175,126,0.12);color:var(--green);border-color:rgba(76,175,126,0.2)}
+.pct-wrap{display:flex;align-items:center;gap:6px}
+.pct-in{background:var(--bg4);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--accent2);font-family:'Sarabun',sans-serif;font-size:16px;font-weight:700;padding:6px 10px;width:65px;text-align:center;outline:none;transition:border-color 0.2s}
+.pct-in:focus{border-color:var(--accent)}
+.pct-sfx{font-size:13px;color:var(--text3)}
+.ibadge{padding:4px 10px;border-radius:4px;font-size:11px;font-weight:700;text-align:center}
+.ibadge.high{background:rgba(224,82,82,0.15);color:var(--red);border:1px solid rgba(224,82,82,0.2)}
+.ibadge.med{background:rgba(232,162,48,0.15);color:var(--amber);border:1px solid rgba(232,162,48,0.2)}
+.ibadge.low{background:rgba(76,175,126,0.15);color:var(--green);border:1px solid rgba(76,175,126,0.2)}
+.ibadge.zero{background:var(--bg4);color:var(--text3);border:1px solid var(--border)}
+.total-row{display:flex;align-items:center;justify-content:space-between;margin-top:10px;padding:10px 14px;background:var(--bg2);border-radius:var(--radius-sm);border:1px solid var(--border2);flex-wrap:wrap;gap:8px}
+.total-label{font-size:13px;color:var(--text2)}
+.total-num{font-size:20px;font-weight:700;margin-left:8px}
+.total-num.ok{color:var(--green)}.total-num.over{color:var(--red)}.total-num.warn{color:var(--amber)}
+.wmult-badge{padding:4px 14px;border-radius:20px;font-size:12px;font-weight:600}
+.src-explain{font-size:12px;color:var(--text3);margin-top:10px;padding:10px 14px;background:var(--bg3);border-radius:var(--radius-sm);border-left:3px solid var(--green);line-height:1.7}
+/* COMPARE */
+.chero{display:grid;grid-template-columns:1fr auto 1fr;gap:1rem;margin-bottom:1.25rem}
+@media(max-width:700px){.chero{grid-template-columns:1fr}}
+.ccol{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem 1.5rem}
+.ccol.base{border-color:rgba(91,145,216,0.3);background:rgba(91,145,216,0.05)}
+.ccol.now{border-color:rgba(232,162,48,0.3);background:rgba(232,162,48,0.05)}
+.carrow{display:flex;align-items:center;justify-content:center;font-size:28px;color:var(--text3)}
+.ctag{font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px}
+.ctag.blue{color:var(--blue)}.ctag.amber{color:var(--amber)}
+.cdate{font-family:'Noto Serif Thai',serif;font-size:15px;font-weight:600;margin-bottom:10px}
+.crow{display:flex;justify-content:space-between;font-size:12px;padding:5px 0;border-bottom:1px solid var(--border)}
+.crow:last-child{border-bottom:none}
+.crow .k{color:var(--text3)}.crow .v{font-weight:600;color:var(--text)}
+.crow .v.up{color:var(--red)}.crow .v.dn{color:var(--green)}
+/* DELTA */
+.dbar{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius);padding:1.25rem 1.5rem;margin-bottom:1.25rem;display:none}
+.dbar.on{display:block}
+.dbar-title{font-size:12px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);margin-bottom:1rem}
+.dgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.dcell{background:var(--bg3);border-radius:var(--radius-sm);padding:12px 14px;border:1px solid var(--border)}
+.dc-label{font-size:11px;color:var(--text3);margin-bottom:3px}
+.dc-base{font-size:11px;color:var(--text3)}
+.dc-now{font-size:11px;color:var(--text2);margin-bottom:5px}
+.dc-change{font-size:20px;font-weight:700}
+.dc-change.up{color:var(--red)}.dc-change.dn{color:var(--green)}.dc-change.neu{color:var(--text2)}
 /* AI BANNER */
-.ai-banner{background:linear-gradient(135deg,rgba(201,168,76,0.08),rgba(91,145,216,0.08));border:1px solid var(--border2);border-radius:var(--radius);padding:1.25rem 1.5rem;margin-bottom:1.25rem;display:flex;gap:1rem;align-items:flex-start}
-.ai-icon{font-size:24px;flex-shrink:0;margin-top:2px}
-.ai-title{font-size:13px;font-weight:600;color:var(--accent2);margin-bottom:6px}
-.ai-body{font-size:13px;color:var(--text2);line-height:1.75}
-.ai-meta{font-size:11px;color:var(--text3);margin-top:8px}
-.ai-refresh{margin-left:auto;flex-shrink:0;background:none;border:1px solid var(--border2);color:var(--text3);font-family:'Sarabun',sans-serif;font-size:12px;padding:6px 12px;border-radius:var(--radius-sm);cursor:pointer;transition:all 0.2s;white-space:nowrap}
-.ai-refresh:hover{color:var(--accent2);border-color:var(--accent)}
-
+.aibanner{background:linear-gradient(135deg,rgba(201,168,76,0.08),rgba(91,145,216,0.08));border:1px solid var(--border2);border-radius:var(--radius);padding:1.25rem 1.5rem;margin-bottom:1.25rem;display:flex;gap:1rem;align-items:flex-start}
+.aiico{font-size:24px;flex-shrink:0;margin-top:2px}
+.aititle{font-size:13px;font-weight:600;color:var(--accent2);margin-bottom:6px}
+.aibody{font-size:13px;color:var(--text2);line-height:1.75}
+.aimeta{font-size:11px;color:var(--text3);margin-top:8px}
+.airefresh{margin-left:auto;flex-shrink:0;background:none;border:1px solid var(--border2);color:var(--text3);font-family:'Sarabun',sans-serif;font-size:12px;padding:6px 12px;border-radius:var(--radius-sm);cursor:pointer;transition:all 0.2s;white-space:nowrap}
+.airefresh:hover{color:var(--accent2);border-color:var(--accent)}
 /* CARDS */
 .card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;margin-bottom:1.25rem}
 .card-title{font-size:12px;font-weight:600;letter-spacing:0.06em;color:var(--text3);margin-bottom:1.25rem;text-transform:uppercase}
 .card-accent{border-left:3px solid var(--accent)}
-
 /* METRICS */
-.metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:1.25rem}
-.metric{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 16px;transition:border-color 0.2s}
-.metric:hover{border-color:var(--border2)}
-.metric-label{font-size:11px;color:var(--text3);margin-bottom:4px;line-height:1.4}
-.metric-base{font-size:11px;color:var(--text3);margin-bottom:2px}
-.metric-val{font-size:22px;font-weight:700;color:var(--text)}
-.metric-delta{font-size:12px;margin-top:4px;font-weight:600}
-.metric-val.red{color:var(--red)} .metric-val.amber{color:var(--amber)} .metric-val.green{color:var(--green)}
-.up-txt{color:var(--red)} .down-txt{color:var(--green)} .neu-txt{color:var(--text3)}
-
+.mgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:10px;margin-bottom:1.25rem}
+.mcard{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 16px;transition:border-color 0.2s}
+.mcard:hover{border-color:var(--border2)}
+.mlabel{font-size:11px;color:var(--text3);margin-bottom:3px;line-height:1.4}
+.mbase{font-size:11px;color:var(--text3);margin-bottom:2px}
+.mval{font-size:22px;font-weight:700;color:var(--text)}
+.mval.red{color:var(--red)}.mval.amber{color:var(--amber)}.mval.green{color:var(--green)}
+.mdelta{font-size:11px;margin-top:3px;font-weight:600}
+.up-t{color:var(--red)}.dn-t{color:var(--green)}.neu-t{color:var(--text3)}
 /* SLIDERS */
-.slider-section{display:grid;grid-template-columns:1fr 1fr;gap:0 2rem}
-@media(max-width:700px){.slider-section{grid-template-columns:1fr}}
-.slider-row{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border)}
-.slider-row:last-child{border-bottom:none}
-.slider-label{font-size:13px;color:var(--text2);min-width:190px;line-height:1.4}
-.slider-ai-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);display:inline-block;margin-right:4px;animation:pulse 2s infinite}
+.slgrid{display:grid;grid-template-columns:1fr 1fr;gap:0 2rem}
+@media(max-width:700px){.slgrid{grid-template-columns:1fr}}
+.slrow{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border)}
+.slrow:last-child{border-bottom:none}
+.sllabel{font-size:13px;color:var(--text2);min-width:190px;line-height:1.4}
+.aidot{width:6px;height:6px;border-radius:50%;background:var(--accent);display:inline-block;margin-right:4px;animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
 input[type=range]{flex:1;-webkit-appearance:none;height:4px;background:var(--bg4);border-radius:2px;outline:none;cursor:pointer}
-input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--accent);cursor:pointer;transition:background 0.2s}
-input[type=range]::-webkit-slider-thumb:hover{background:var(--accent2)}
-.slider-val{font-size:13px;font-weight:600;min-width:62px;text-align:right;color:var(--accent2)}
-
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--accent);cursor:pointer}
+.slval{font-size:13px;font-weight:600;min-width:62px;text-align:right;color:var(--accent2)}
 /* TABLE */
 table{width:100%;border-collapse:collapse}
 th{font-size:11px;font-weight:600;letter-spacing:0.04em;color:var(--text3);text-align:left;padding:10px 12px;border-bottom:1px solid var(--border2)}
@@ -167,1178 +157,921 @@ tr:hover td{background:var(--bg3);color:var(--text)}
 .badge-amber{background:rgba(232,162,48,0.15);color:var(--amber)}
 .badge-green{background:rgba(76,175,126,0.15);color:var(--green)}
 .badge-blue{background:rgba(91,145,216,0.15);color:var(--blue)}
-
 /* SCENARIO */
-.sc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.25rem}
-@media(max-width:700px){.sc-grid{grid-template-columns:1fr}}
-.sc-card{border-radius:var(--radius);overflow:hidden;border:1px solid var(--border)}
-.sc-header{padding:12px 16px;font-size:13px;font-weight:600}
-.sc-header.mild{background:rgba(76,175,126,0.15);color:var(--green)}
-.sc-header.moderate{background:rgba(232,162,48,0.15);color:var(--amber)}
-.sc-header.severe{background:rgba(224,82,82,0.15);color:var(--red)}
-.sc-body{padding:12px 16px;background:var(--bg2)}
-.sc-row{display:flex;justify-content:space-between;font-size:12px;padding:5px 0;border-bottom:1px solid var(--border)}
-.sc-row:last-child{border-bottom:none}
-.sc-row .k{color:var(--text3)} .sc-row .v{font-weight:600;color:var(--text)}
-
+.scgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.25rem}
+@media(max-width:700px){.scgrid{grid-template-columns:1fr}}
+.sccard{border-radius:var(--radius);overflow:hidden;border:1px solid var(--border)}
+.schead{padding:12px 16px;font-size:13px;font-weight:600}
+.schead.mild{background:rgba(76,175,126,0.15);color:var(--green)}
+.schead.moderate{background:rgba(232,162,48,0.15);color:var(--amber)}
+.schead.severe{background:rgba(224,82,82,0.15);color:var(--red)}
+.scbody{padding:12px 16px;background:var(--bg2)}
+.scrow{display:flex;justify-content:space-between;font-size:12px;padding:5px 0;border-bottom:1px solid var(--border)}
+.scrow:last-child{border-bottom:none}
+.scrow .k{color:var(--text3)}.scrow .v{font-weight:600;color:var(--text)}
 /* PILLARS */
-.pillar-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin-bottom:1.25rem}
-.pillar-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;border-top:3px solid}
-.pillar-name{font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px}
-.pillar-pct{font-size:22px;font-weight:600;margin-bottom:6px}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin-bottom:1.25rem}
+.pcard{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;border-top:3px solid}
+.pname{font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px}
+.ppct{font-size:22px;font-weight:600;margin-bottom:6px}
 .pbar{height:4px;background:var(--bg4);border-radius:2px}
-.pbar-fill{height:100%;border-radius:2px;transition:width 0.4s ease}
-.r-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)}
-.r-row:last-child{border-bottom:none}
-.r-label{font-size:13px;color:var(--text2);flex:1;line-height:1.5}
-.r-slider{width:120px}
-.r-pct{font-size:12px;font-weight:600;min-width:35px;text-align:right;color:var(--accent)}
-.score-big{font-family:'Noto Serif Thai',serif;font-size:56px;color:var(--accent2);line-height:1;font-weight:600}
-.score-label{font-size:14px;color:var(--text2);margin-top:6px}
-
+.pbar-fill{height:100%;border-radius:2px;transition:width 0.4s}
+.rrow{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)}
+.rrow:last-child{border-bottom:none}
+.rlabel{font-size:13px;color:var(--text2);flex:1;line-height:1.5}
+.rslider{width:120px}
+.rpct{font-size:12px;font-weight:600;min-width:35px;text-align:right;color:var(--accent)}
+.scorebig{font-family:'Noto Serif Thai',serif;font-size:56px;color:var(--accent2);line-height:1;font-weight:600}
 /* CHECKLIST */
-.checklist-item{display:flex;align-items:flex-start;gap:14px;padding:12px 0;border-bottom:1px solid var(--border);cursor:pointer}
-.checklist-item:last-child{border-bottom:none}
-.check-box{width:20px;height:20px;border-radius:4px;border:1px solid var(--border2);background:var(--bg3);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;transition:all 0.2s;margin-top:2px;user-select:none}
-.check-box.checked{background:var(--accent);border-color:var(--accent);color:#000;font-weight:700}
-.check-text{font-size:14px;color:var(--text);line-height:1.6}
-.check-sub{font-size:12px;color:var(--text3);margin-top:2px;line-height:1.5}
-.checklist-item.checked .check-text{color:var(--text3);text-decoration:line-through}
-
-.chart-wrap{position:relative}
-.interpretation{background:var(--bg3);border:1px solid var(--border2);border-left:3px solid var(--accent);border-radius:var(--radius-sm);padding:14px 16px;font-size:14px;color:var(--text2);line-height:1.8;margin-top:1rem}
+.clitem{display:flex;align-items:flex-start;gap:14px;padding:12px 0;border-bottom:1px solid var(--border);cursor:pointer}
+.clitem:last-child{border-bottom:none}
+.clbox{width:20px;height:20px;border-radius:4px;border:1px solid var(--border2);background:var(--bg3);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;transition:all 0.2s;margin-top:2px;user-select:none}
+.clbox.on{background:var(--accent);border-color:var(--accent);color:#000;font-weight:700}
+.cltxt{font-size:14px;color:var(--text);line-height:1.6}
+.clsub{font-size:12px;color:var(--text3);margin-top:2px}
+.clitem.on .cltxt{color:var(--text3);text-decoration:line-through}
+.interp{background:var(--bg3);border:1px solid var(--border2);border-left:3px solid var(--accent);border-radius:var(--radius-sm);padding:14px 16px;font-size:14px;color:var(--text2);line-height:1.8;margin-top:1rem}
 .legend{display:flex;flex-wrap:wrap;gap:16px;margin-bottom:12px}
-.leg-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text3)}
-.leg-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+.legitem{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text3)}
+.legdot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
 .footer{text-align:center;padding:2rem;color:var(--text3);font-size:12px;border-top:1px solid var(--border);margin-top:2rem}
 @media(max-width:700px){
-  .nav-btn{font-size:11px;padding:6px 8px}
+  .nbtn{font-size:11px;padding:6px 8px}
   .header-inner{flex-direction:column;height:auto;padding:12px 0;gap:8px}
   .main{padding:1rem}
-  .compare-arrow{display:none}
+  .sllabel{min-width:140px;font-size:12px}
+  .carrow{display:none}
 }
-/* ══ SUPPLY ORIGIN ENGINE ══ */
-.origin-card{background:linear-gradient(135deg,rgba(76,175,126,0.06),rgba(91,145,216,0.06));border:1px solid rgba(76,175,126,0.25);border-radius:14px;padding:1.5rem 2rem;margin-bottom:1.5rem}
-.origin-title{font-family:'Noto Serif Thai',serif;font-size:18px;font-weight:600;color:var(--green);margin-bottom:4px}
-.origin-sub{font-size:13px;color:var(--text2);margin-bottom:1.25rem;line-height:1.6}
-.sku-list{display:flex;flex-direction:column;gap:8px;margin-bottom:1rem}
-.sku-row{display:grid;grid-template-columns:2fr 1.8fr 0.8fr 0.8fr auto;gap:8px;align-items:center;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;transition:border-color 0.2s}
-.sku-row:hover{border-color:var(--border2)}
-@media(max-width:900px){.sku-row{grid-template-columns:1fr 1fr;gap:6px}}
-.sku-name-input{background:transparent;border:none;color:var(--text);font-family:'Sarabun',sans-serif;font-size:13px;font-weight:500;outline:none;width:100%}
-.sku-name-input::placeholder{color:var(--text3)}
-.origin-select{background:var(--bg4);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'Sarabun',sans-serif;font-size:13px;padding:7px 10px;outline:none;cursor:pointer;width:100%}
-.origin-select:focus{border-color:var(--accent)}
-.origin-select option{background:var(--bg3)}
-.pct-input{background:var(--bg4);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'Sarabun',sans-serif;font-size:13px;font-weight:600;padding:7px 10px;outline:none;text-align:right;width:100%}
-.pct-input:focus{border-color:var(--accent)}
-.sku-delete{background:none;border:none;color:var(--text3);cursor:pointer;font-size:16px;padding:4px 8px;border-radius:4px;transition:all 0.2s}
-.sku-delete:hover{color:var(--red);background:rgba(224,82,82,0.1)}
-.add-sku-btn{background:none;border:1px dashed var(--border2);border-radius:var(--radius-sm);color:var(--text3);font-family:'Sarabun',sans-serif;font-size:13px;padding:10px;cursor:pointer;width:100%;transition:all 0.2s;margin-bottom:1rem}
-.add-sku-btn:hover{border-color:var(--green);color:var(--green);background:rgba(76,175,126,0.05)}
-.origin-impact{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius);padding:1.25rem 1.5rem;margin-bottom:1.25rem;display:none}
-.origin-impact.visible{display:block}
-.origin-impact-title{font-size:12px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);margin-bottom:1rem}
-.origin-breakdown{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px;margin-bottom:1rem}
-.origin-item{background:var(--bg3);border-radius:var(--radius-sm);padding:12px 14px;border-left:3px solid;display:flex;flex-direction:column;gap:3px}
-.origin-item-name{font-size:13px;font-weight:600;color:var(--text)}
-.origin-item-pct{font-size:11px;color:var(--text3)}
-.origin-item-route{font-size:11px;color:var(--text3);margin-top:2px;line-height:1.5}
-.origin-item-impact{font-size:20px;font-weight:700;margin-top:4px}
-.origin-item-impact.red{color:var(--red)} .origin-item-impact.amber{color:var(--amber)} .origin-item-impact.green{color:var(--green)}
-.origin-risk-tag{display:inline-flex;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;margin-top:4px;width:fit-content}
-.origin-weighted-result{background:linear-gradient(135deg,rgba(201,168,76,0.1),rgba(232,162,48,0.05));border:1px solid rgba(201,168,76,0.3);border-radius:var(--radius-sm);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
-.origin-weighted-label{font-size:13px;color:var(--text2)}
-.origin-weighted-val{font-family:'Noto Serif Thai',serif;font-size:32px;font-weight:600;color:var(--accent2)}
-.origin-weighted-sub{font-size:11px;color:var(--text3);margin-top:2px}
-.pct-total-bar{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:var(--radius-sm);background:var(--bg3);font-size:12px;margin-bottom:12px}
-.pct-total-ok{color:var(--green)} .pct-total-warn{color:var(--amber)} .pct-total-err{color:var(--red)}
 </style>
 </head>
 <body>
-
-<!-- LOADING -->
 <div id="loading-overlay">
-  <div class="loading-logo">⚔ War Game Planner v3</div>
-  <div class="loading-sub">กำลังวิเคราะห์สถานการณ์โลกปัจจุบันด้วย AI</div>
+  <div class="loading-logo">War Game Planner v3</div>
+  <div class="loading-sub">AI กำลังวิเคราะห์สถานการณ์โลกล่าสุด</div>
   <div class="loading-steps">
-    <div class="loading-step" id="step-1"><span class="step-icon">🌐</span>ดึงข้อมูลราคาน้ำมันและโลจิสติกส์ล่าสุด</div>
-    <div class="loading-step" id="step-2"><span class="step-icon">🚢</span>วิเคราะห์สถานการณ์ช่องแคบฮอร์มุซ</div>
-    <div class="loading-step" id="step-3"><span class="step-icon">🤖</span>AI ประมวลผลและคำนวณค่าตัวแปร</div>
-    <div class="loading-step" id="step-4"><span class="step-icon">📊</span>ตั้งค่าแดชบอร์ดตามข้อมูลจริง</div>
+    <div class="lstep" id="ls1"><span class="stepico">🌐</span>ดึงข้อมูลราคาน้ำมันและโลจิสติกส์</div>
+    <div class="lstep" id="ls2"><span class="stepico">🚢</span>วิเคราะห์สถานการณ์ช่องแคบฮอร์มุซ</div>
+    <div class="lstep" id="ls3"><span class="stepico">🤖</span>AI ประมวลผลและคำนวณค่าตัวแปร</div>
+    <div class="lstep" id="ls4"><span class="stepico">📊</span>ตั้งค่าแดชบอร์ดตามข้อมูลจริง</div>
   </div>
-  <div class="loading-bar-wrap"><div class="loading-bar" id="loading-bar"></div></div>
+  <div class="lbar-wrap"><div class="lbar" id="lbar"></div></div>
 </div>
-
 <header class="header">
   <div class="header-inner">
     <div class="logo">
-      <div class="logo-icon">⚔</div>
+      <div class="logo-icon">&#9876;</div>
       <div>
         <div style="display:flex;align-items:center;gap:6px">
-          <div class="logo-text">War Game Planner</div>
-          <span class="logo-ai-badge">🤖 AI Live</span>
+          <div class="logo-text">War Game Planner v3</div>
+          <span class="ai-badge">AI Live</span>
         </div>
-        <div class="logo-sub">เปรียบเทียบต้นทุน ณ วันที่เลือก vs ปัจจุบัน</div>
+        <div class="logo-sub">Supply Source Impact + Baseline Comparison</div>
       </div>
     </div>
     <nav class="nav">
-      <button class="nav-btn active" onclick="switchTab('scenario',this)">จำลองสถานการณ์</button>
-      <button class="nav-btn" onclick="switchTab('pillars',this)">5 เสาหลัก</button>
-      <button class="nav-btn" onclick="switchTab('compare',this)">เปรียบเทียบ 3 ระดับ</button>
-      <button class="nav-btn" onclick="switchTab('actions',this)">รายการตรวจสอบ</button>
+      <button class="nbtn active" onclick="switchTab('scenario',this)">จำลองสถานการณ์</button>
+      <button class="nbtn" onclick="switchTab('pillars',this)">5 เสาหลัก</button>
+      <button class="nbtn" onclick="switchTab('compare',this)">เปรียบเทียบ 3 ระดับ</button>
+      <button class="nbtn" onclick="switchTab('actions',this)">รายการตรวจสอบ</button>
     </nav>
   </div>
 </header>
-
 <main class="main">
 
-  <!-- ══ BASELINE INPUT ══ -->
-  <div class="baseline-card">
-    <div class="baseline-title">📅 กำหนดจุดอ้างอิง (Baseline)</div>
-    <div class="baseline-sub">ป้อนวันที่และต้นทุนต่อลัง ณ วันนั้น — AI จะดึงข้อมูลสถานการณ์โลก ณ วันนั้นมาเปรียบเทียบกับสถานการณ์ปัจจุบันให้อัตโนมัติ</div>
-    <div class="baseline-grid">
-      <div class="input-group">
-        <label class="input-label">📅 วันที่อ้างอิง (Baseline Date)</label>
-        <input type="date" id="baseline-date" class="input-field" value="2026-02-27">
+<!-- BASELINE -->
+<div class="bcard">
+  <div class="bcard-title">&#128197; กำหนดจุดอ้างอิง (Baseline)</div>
+  <div class="bcard-sub">ป้อนวันที่และต้นทุนต่อลัง ณ วันนั้น — AI จะเปรียบเทียบสถานการณ์โลก ณ วันนั้น vs ปัจจุบัน</div>
+  <div class="bgrid">
+    <div class="igroup">
+      <label class="ilabel">วันที่อ้างอิง</label>
+      <input type="date" id="bl-date" class="ifield" value="2026-02-27">
+    </div>
+    <div class="igroup">
+      <label class="ilabel">ต้นทุนต่อลัง ณ วันนั้น (฿)</label>
+      <input type="number" id="bl-cost" class="ifield" value="500" min="1">
+    </div>
+    <div class="igroup">
+      <label class="ilabel">ราคาขายต่อลัง ณ วันนั้น (฿)</label>
+      <input type="number" id="bl-price" class="ifield" value="700" min="1">
+    </div>
+    <button class="abtn" id="analyze-btn" onclick="runAnalysis()">&#128269; วิเคราะห์เปรียบเทียบ</button>
+  </div>
+</div>
+
+<!-- SUPPLY SOURCE -->
+<div class="scard">
+  <div class="scard-title">&#128674; โครงสร้างแหล่งที่มาของสินค้า (Supply Source Mix)</div>
+  <div class="scard-sub">กำหนดสัดส่วนสินค้าสำเร็จรูปจากแต่ละแหล่ง — AI คำนวณผลกระทบต้นทุนโลจิสติกส์ถ่วงน้ำหนักตามเส้นทางขนส่งจริง รวมต้องได้ <strong style="color:var(--accent2)">100%</strong></div>
+  <div class="srows">
+    <div class="srow">
+      <div class="sinfo">
+        <div class="sflag">&#127464;&#127475;</div>
+        <div>
+          <div class="sname">นำเข้าจากจีน</div>
+          <div class="sports"><span class="sport">Shanghai</span><span class="sport">Ningbo</span><span class="sport">Guangzhou</span><span class="sport">Shenzhen</span></div>
+          <div class="sdesc">เส้นทาง China → Laem Chabang ผ่าน South China Sea / Malacca Strait — ไม่ผ่านฮอร์มุซ</div>
+        </div>
       </div>
-      <div class="input-group">
-        <label class="input-label">💰 ต้นทุนต่อลัง ณ วันนั้น (฿)</label>
-        <input type="number" id="baseline-cost" class="input-field" placeholder="เช่น 160" value="160" min="1">
+      <div class="pct-wrap"><input type="number" class="pct-in" id="pct-cn" value="60" min="0" max="100" oninput="onSrcChange()"><span class="pct-sfx">%</span></div>
+      <div><div class="ibadge med" id="ib-cn">กระทบปานกลาง</div><div style="font-size:10px;color:var(--text3);margin-top:3px;text-align:center" id="id-cn">60% ของทั้งหมด</div></div>
+    </div>
+    <div class="srow">
+      <div class="sinfo">
+        <div class="sflag">&#127481;&#127469;</div>
+        <div>
+          <div class="sname">ซื้อจากผู้ผลิตในประเทศไทย (Supplier ไทย)</div>
+          <div class="sports"><span class="sport green">Supplier ไทย</span></div>
+          <div class="sdesc">ซัพพลายเออร์ไทย — อาจใช้วัตถุดิบนำเข้าบางส่วน แต่ไม่มีค่าขนส่งระหว่างประเทศ</div>
+        </div>
       </div>
-      <div class="input-group">
-        <label class="input-label">📦 ราคาขายต่อลัง ณ วันนั้น (฿)</label>
-        <input type="number" id="baseline-price" class="input-field" placeholder="เช่น 200" value="200" min="1">
+      <div class="pct-wrap"><input type="number" class="pct-in" id="pct-th" value="20" min="0" max="100" oninput="onSrcChange()"><span class="pct-sfx">%</span></div>
+      <div><div class="ibadge low" id="ib-th">กระทบน้อย</div><div style="font-size:10px;color:var(--text3);margin-top:3px;text-align:center" id="id-th">20% ของทั้งหมด</div></div>
+    </div>
+    <div class="srow">
+      <div class="sinfo">
+        <div class="sflag">&#127981;</div>
+        <div>
+          <div class="sname">ผลิตเองในประเทศ (In-house Manufacturing)</div>
+          <div class="sports"><span class="sport green">โรงงานในประเทศ</span></div>
+          <div class="sdesc">ผลิตเองในไทย — ใช้วัตถุดิบในประเทศเป็นหลัก ไม่มีค่าขนส่งระหว่างประเทศ</div>
+        </div>
       </div>
-      <button class="analyze-btn" id="analyze-btn" onclick="runBaselineAnalysis()">
-        🔍 วิเคราะห์เปรียบเทียบ
-      </button>
+      <div class="pct-wrap"><input type="number" class="pct-in" id="pct-mfg" value="0" min="0" max="100" oninput="onSrcChange()"><span class="pct-sfx">%</span></div>
+      <div><div class="ibadge zero" id="ib-mfg">0% — ไม่ใช้</div><div style="font-size:10px;color:var(--text3);margin-top:3px;text-align:center" id="id-mfg"></div></div>
+    </div>
+    <div class="srow">
+      <div class="sinfo">
+        <div class="sflag">&#127757;</div>
+        <div>
+          <div class="sname">นำเข้าจากตะวันออกกลาง / อินเดีย</div>
+          <div class="sports"><span class="sport red">Dubai</span><span class="sport red">Mumbai</span><span class="sport red">Jebel Ali</span></div>
+          <div class="sdesc">ผ่านช่องแคบฮอร์มุซโดยตรง — ได้รับผลกระทบสูงสุดจากสงคราม</div>
+        </div>
+      </div>
+      <div class="pct-wrap"><input type="number" class="pct-in" id="pct-me" value="20" min="0" max="100" oninput="onSrcChange()"><span class="pct-sfx">%</span></div>
+      <div><div class="ibadge high" id="ib-me">กระทบสูงมาก</div><div style="font-size:10px;color:var(--text3);margin-top:3px;text-align:center" id="id-me">20% ของทั้งหมด</div></div>
+    </div>
+    <div class="srow">
+      <div class="sinfo">
+        <div class="sflag">&#127758;</div>
+        <div>
+          <div class="sname">นำเข้าจากยุโรป / อเมริกา</div>
+          <div class="sports"><span class="sport">Rotterdam</span><span class="sport">Hamburg</span><span class="sport">Los Angeles</span></div>
+          <div class="sdesc">เส้นทางยาวผ่าน Suez/Cape of Good Hope — ค่าขนส่งสูง เวลา +2-4 สัปดาห์</div>
+        </div>
+      </div>
+      <div class="pct-wrap"><input type="number" class="pct-in" id="pct-eu" value="0" min="0" max="100" oninput="onSrcChange()"><span class="pct-sfx">%</span></div>
+      <div><div class="ibadge zero" id="ib-eu">0% — ไม่ใช้</div><div style="font-size:10px;color:var(--text3);margin-top:3px;text-align:center" id="id-eu"></div></div>
     </div>
   </div>
-
-  <!-- ══ SUPPLY ORIGIN ENGINE ══ -->
-  <div class="origin-card">
-    <div class="origin-title">🗺 Supply Origin Engine — ต้นทางสินค้า</div>
-    <div class="origin-sub">
-      ระบุว่าสินค้าแต่ละประเภทมาจากไหน — ระบบจะคำนวณผลกระทบต้นทุนแบบ <strong style="color:var(--accent2)">Weighted Average</strong> ตามเส้นทางขนส่งจริงของแต่ละแหล่ง ไม่ใช่ค่าเฉลี่ยกลางๆ
+  <div class="total-row">
+    <div class="total-label">รวมสัดส่วนทั้งหมด: <span class="total-num ok" id="total-num">100%</span></div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <span style="font-size:12px;color:var(--text3)">ผลกระทบโลจิสติกส์ถ่วงน้ำหนัก:</span>
+      <span class="wmult-badge" id="wmult-badge" style="background:rgba(232,162,48,0.15);color:var(--amber)">คำนวณอยู่...</span>
     </div>
-
-    <!-- Column Headers -->
-    <div style="display:grid;grid-template-columns:2fr 1.8fr 0.8fr 0.8fr auto;gap:8px;padding:0 12px;margin-bottom:6px">
-      <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--text3)">ชื่อกลุ่มสินค้า / SKU</div>
-      <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--text3)">แหล่งที่มา / เมืองท่า</div>
-      <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--text3);text-align:right">สัดส่วน %</div>
-      <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--text3);text-align:right">ต้นทุน/ลัง ฿</div>
-      <div></div>
-    </div>
-
-    <div class="sku-list" id="sku-list"></div>
-
-    <div class="pct-total-bar" id="pct-total-bar">
-      <span id="pct-total-icon">⚖</span>
-      <span id="pct-total-text" style="flex:1">รวมสัดส่วน: 0% — กรุณาให้รวมได้ 100%</span>
-      <span id="pct-total-val" style="font-weight:700">0%</span>
-    </div>
-
-    <button class="add-sku-btn" onclick="addSKU()">+ เพิ่มกลุ่มสินค้า / แหล่งที่มา</button>
-
-    <button class="analyze-btn" style="width:100%" onclick="calcOriginImpact()">
-      🗺 คำนวณผลกระทบตามต้นทางสินค้า
-    </button>
   </div>
+  <div class="src-explain" id="src-explain">ปรับสัดส่วนด้านบนเพื่อให้ AI คำนวณผลกระทบต้นทุนโลจิสติกส์ถ่วงน้ำหนักตามจริง</div>
+</div>
 
-  <!-- ══ ORIGIN IMPACT RESULT ══ -->
-  <div class="origin-impact" id="origin-impact">
-    <div class="origin-impact-title">ผลกระทบต้นทุนแยกตามต้นทางสินค้า</div>
-    <div class="origin-breakdown" id="origin-breakdown"></div>
-    <div class="origin-weighted-result">
+<!-- COMPARE HERO -->
+<div class="chero" id="chero" style="display:none">
+  <div class="ccol base">
+    <div class="ctag blue">วันที่อ้างอิง (Baseline)</div>
+    <div class="cdate" id="c-base-date"></div>
+    <div id="c-base-rows"></div>
+  </div>
+  <div class="carrow">&#10145;</div>
+  <div class="ccol now">
+    <div class="ctag amber">สถานการณ์ปัจจุบัน (AI วิเคราะห์)</div>
+    <div class="cdate" id="c-now-date">มีนาคม 2569</div>
+    <div id="c-now-rows"></div>
+  </div>
+</div>
+
+<!-- DELTA -->
+<div class="dbar" id="dbar">
+  <div class="dbar-title">ผลกระทบสุทธิ — เปลี่ยนแปลงจาก Baseline</div>
+  <div class="dgrid" id="dgrid"></div>
+</div>
+
+<!-- AI BANNER -->
+<div class="aibanner" id="aibanner" style="display:none">
+  <div class="aiico">&#129302;</div>
+  <div style="flex:1">
+    <div class="aititle">สรุปสถานการณ์โลกโดย AI — อัปเดตล่าสุด</div>
+    <div class="aibody" id="ai-body">กำลังโหลด...</div>
+    <div class="aimeta" id="ai-meta"></div>
+  </div>
+  <button class="airefresh" onclick="runAnalysis()">&#128260; อัปเดตใหม่</button>
+</div>
+
+<!-- TAB: SIMULATOR -->
+<div id="tab-scenario" class="panel active">
+  <div class="card card-accent">
+    <div class="card-title" style="display:flex;justify-content:space-between;align-items:center">
+      <span>ตัวแปรความเสี่ยง — <span id="ai-set-label" style="color:var(--accent)">ตั้งค่าโดย AI</span></span>
+      <span style="font-size:11px;color:var(--text3)"><span class="aidot"></span>= AI ตั้งค่าอัตโนมัติ</span>
+    </div>
+    <div class="slgrid">
       <div>
-        <div class="origin-weighted-label">ต้นทุนเฉลี่ยถ่วงน้ำหนักที่เพิ่มขึ้น/ลัง (Weighted Average)</div>
-        <div class="origin-weighted-val" id="origin-weighted-val">—</div>
-        <div class="origin-weighted-sub" id="origin-weighted-sub">คำนวณจากสัดส่วนและเส้นทางขนส่งจริงของแต่ละแหล่ง</div>
+        <div class="slrow"><span class="sllabel"><span class="aidot"></span>ราคาน้ำมันเพิ่มขึ้น (USD/บาร์เรล)</span><input type="range" min="0" max="100" step="5" value="30" id="s-oil" oninput="recalc()"><span class="slval" id="v-oil">+$30</span></div>
+        <div class="slrow"><span class="sllabel"><span class="aidot"></span>ต้นทุนโลจิสติกส์เพิ่มขึ้น (฿/ลัง)</span><input type="range" min="0" max="60" step="5" value="20" id="s-log" oninput="recalc()"><span class="slval" id="v-log">+฿20</span></div>
+        <div class="slrow"><span class="sllabel"><span class="aidot"></span>ต้นทุนวัตถุดิบเพิ่มขึ้น (%)</span><input type="range" min="0" max="40" step="2" value="12" id="s-raw" oninput="recalc()"><span class="slval" id="v-raw">+12%</span></div>
       </div>
-      <div style="text-align:right">
-        <div style="font-size:11px;color:var(--text3);margin-bottom:4px">เทียบกับ Slider ปัจจุบัน</div>
-        <div style="font-size:16px;font-weight:700" id="origin-vs-slider">—</div>
-        <button style="margin-top:8px;background:var(--accent);border:none;border-radius:var(--radius-sm);color:#000;font-family:'Sarabun',sans-serif;font-size:12px;font-weight:700;padding:6px 14px;cursor:pointer" onclick="applyOriginToSlider()">
-          ใช้ค่านี้ใน Simulator
-        </button>
+      <div>
+        <div class="slrow"><span class="sllabel"><span class="aidot"></span>ต้นทุนพลังงานเพิ่มขึ้น (%)</span><input type="range" min="0" max="60" step="5" value="20" id="s-en" oninput="recalc()"><span class="slval" id="v-en">+20%</span></div>
+        <div class="slrow"><span class="sllabel"><span class="aidot"></span>ปริมาณขายลดลง (%)</span><input type="range" min="0" max="30" step="1" value="8" id="s-vol" oninput="recalc()"><span class="slval" id="v-vol">-8%</span></div>
+        <div class="slrow"><span class="sllabel">การปรับราคาขายที่ส่งต่อลูกค้า (%)</span><input type="range" min="0" max="30" step="1" value="7" id="s-price" oninput="recalc()"><span class="slval" id="v-price">+7%</span></div>
       </div>
     </div>
   </div>
-
-  <!-- ══ BEFORE / AFTER COMPARISON ══ -->
-  <div class="compare-hero" id="compare-hero" style="display:none">
-    <div class="compare-col baseline-col">
-      <div class="col-tag blue">📅 ต้นทุน ณ วันอ้างอิง</div>
-      <div class="col-date" id="col-base-date">27 กุมภาพันธ์ 2569</div>
-      <div class="col-rows" id="col-base-rows"></div>
+  <div class="mgrid">
+    <div class="mcard"><div class="mlabel">ต้นทุนเพิ่ม/ลัง (฿)</div><div class="mbase" id="mb1"></div><div class="mval" id="mv1">—</div><div class="mdelta" id="md1"></div></div>
+    <div class="mcard"><div class="mlabel">ต้นทุนรวม/ลัง (฿)</div><div class="mbase" id="mb2"></div><div class="mval" id="mv2">—</div><div class="mdelta" id="md2"></div></div>
+    <div class="mcard"><div class="mlabel">มาร์จินต่อลัง (฿)</div><div class="mbase" id="mb3"></div><div class="mval" id="mv3">—</div><div class="mdelta" id="md3"></div></div>
+    <div class="mcard"><div class="mlabel">มาร์จิน (%)</div><div class="mbase" id="mb4"></div><div class="mval" id="mv4">—</div><div class="mdelta" id="md4"></div></div>
+    <div class="mcard"><div class="mlabel">ผลกระทบรายได้ (%)</div><div class="mbase" id="mb5"></div><div class="mval" id="mv5">—</div><div class="mdelta" id="md5"></div></div>
+    <div class="mcard"><div class="mlabel">ระดับความเสี่ยง</div><div class="mbase" id="mb6"></div><div class="mval" id="mv6">—</div><div class="mdelta" id="md6"></div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">โครงสร้างต้นทุน Waterfall — ถ่วงน้ำหนักตาม Supply Source</div>
+    <div class="legend">
+      <span class="legitem"><span class="legdot" style="background:#5b91d8"></span>Baseline</span>
+      <span class="legitem"><span class="legdot" style="background:#e05252"></span>ต้นทุนเพิ่ม</span>
+      <span class="legitem"><span class="legdot" style="background:#4caf7e"></span>ชดเชยจากราคา</span>
+      <span class="legitem"><span class="legdot" style="background:#e8a230"></span>ต้นทุนรวม</span>
     </div>
-    <div class="compare-arrow">➜</div>
-    <div class="compare-col current-col">
-      <div class="col-tag amber">🔴 สถานการณ์ปัจจุบัน (AI วิเคราะห์)</div>
-      <div class="col-date" id="col-now-date">มีนาคม 2569</div>
-      <div class="col-rows" id="col-now-rows"></div>
+    <div style="position:relative;height:280px"><canvas id="wfChart"></canvas></div>
+  </div>
+  <div class="interp" id="interp">ปรับค่าด้านบนเพื่อดูการวิเคราะห์</div>
+</div>
+
+<!-- TAB: PILLARS -->
+<div id="tab-pillars" class="panel">
+  <div class="card">
+    <div class="card-title">คะแนนความพร้อมโดยรวม</div>
+    <div style="display:flex;align-items:flex-end;gap:1.5rem;flex-wrap:wrap">
+      <div><div class="scorebig" id="ov-score">0%</div><div style="font-size:14px;color:var(--text2);margin-top:6px" id="ov-label">ปรับระดับความพร้อมด้านล่าง</div></div>
+      <div style="flex:1;min-width:200px"><div class="pbar" style="height:8px"><div class="pbar-fill" id="ov-bar" style="width:0%;background:var(--red)"></div></div></div>
     </div>
   </div>
+  <div class="pgrid" id="pgrid"></div>
+  <div id="rsection"></div>
+</div>
 
-  <!-- ══ DELTA SUMMARY ══ -->
-  <div class="delta-bar" id="delta-bar">
-    <div class="delta-title">ผลกระทบสุทธิ — เปลี่ยนแปลงจาก Baseline</div>
-    <div class="delta-grid" id="delta-grid"></div>
-  </div>
-
-  <!-- AI BANNER -->
-  <div class="ai-banner" id="ai-banner" style="display:none">
-    <div class="ai-icon">🤖</div>
-    <div style="flex:1">
-      <div class="ai-title">สรุปสถานการณ์โลกโดย AI</div>
-      <div class="ai-body" id="ai-summary">กำลังโหลด...</div>
-      <div class="ai-meta" id="ai-meta"></div>
-    </div>
-    <button class="ai-refresh" onclick="runBaselineAnalysis()">🔄 วิเคราะห์ใหม่</button>
-  </div>
-
-  <!-- TAB: จำลองสถานการณ์ -->
-  <div id="tab-scenario" class="panel active">
-    <div class="card card-accent">
-      <div class="card-title" style="display:flex;justify-content:space-between;align-items:center">
-        <span>ตัวแปรความเสี่ยง — <span id="ai-set-label" style="color:var(--accent)">ตั้งค่าโดย AI จากข้อมูลจริง</span></span>
-        <span style="font-size:11px;color:var(--text3)"><span class="slider-ai-dot"></span>= AI ตั้งค่าอัตโนมัติ</span>
-      </div>
-      <div class="slider-section">
-        <div>
-          <div class="slider-row">
-            <span class="slider-label"><span class="slider-ai-dot"></span>ราคาน้ำมันเพิ่มขึ้น (USD/บาร์เรล)</span>
-            <input type="range" min="0" max="100" step="5" value="30" id="s-oil" oninput="recalc()">
-            <span class="slider-val" id="v-oil">+$30</span>
-          </div>
-          <div class="slider-row">
-            <span class="slider-label"><span class="slider-ai-dot"></span>ต้นทุนโลจิสติกส์เพิ่มขึ้น (บาท/ลัง)</span>
-            <input type="range" min="0" max="60" step="5" value="20" id="s-logistics" oninput="recalc()">
-            <span class="slider-val" id="v-logistics">+฿20</span>
-          </div>
-          <div class="slider-row">
-            <span class="slider-label"><span class="slider-ai-dot"></span>ต้นทุนวัตถุดิบเพิ่มขึ้น (%)</span>
-            <input type="range" min="0" max="40" step="2" value="12" id="s-rawmat" oninput="recalc()">
-            <span class="slider-val" id="v-rawmat">+12%</span>
-          </div>
-        </div>
-        <div>
-          <div class="slider-row">
-            <span class="slider-label"><span class="slider-ai-dot"></span>ต้นทุนพลังงานเพิ่มขึ้น (%)</span>
-            <input type="range" min="0" max="60" step="5" value="20" id="s-energy" oninput="recalc()">
-            <span class="slider-val" id="v-energy">+20%</span>
-          </div>
-          <div class="slider-row">
-            <span class="slider-label"><span class="slider-ai-dot"></span>ปริมาณขายลดลงจากการปรับราคา (%)</span>
-            <input type="range" min="0" max="30" step="1" value="8" id="s-vol" oninput="recalc()">
-            <span class="slider-val" id="v-vol">-8%</span>
-          </div>
-          <div class="slider-row">
-            <span class="slider-label">การปรับราคาขายที่ส่งต่อลูกค้า (%)</span>
-            <input type="range" min="0" max="30" step="1" value="7" id="s-price" oninput="recalc()">
-            <span class="slider-val" id="v-price">+7%</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="metric-grid" id="metric-grid">
-      <div class="metric"><div class="metric-label">ต้นทุนเพิ่มขึ้น/ลัง (฿)</div><div class="metric-base" id="mb-costcase"></div><div class="metric-val" id="m-costcase">—</div><div class="metric-delta" id="md-costcase"></div></div>
-      <div class="metric"><div class="metric-label">ต้นทุนรวม/ลัง (฿)</div><div class="metric-base" id="mb-totalcost"></div><div class="metric-val" id="m-totalcost">—</div><div class="metric-delta" id="md-totalcost"></div></div>
-      <div class="metric"><div class="metric-label">มาร์จินต่อลัง (฿)</div><div class="metric-base" id="mb-marginthb"></div><div class="metric-val" id="m-marginthb">—</div><div class="metric-delta" id="md-marginthb"></div></div>
-      <div class="metric"><div class="metric-label">มาร์จิน (%)</div><div class="metric-base" id="mb-marginpct"></div><div class="metric-val" id="m-marginpct">—</div><div class="metric-delta" id="md-marginpct"></div></div>
-      <div class="metric"><div class="metric-label">ผลกระทบต่อรายได้ (%)</div><div class="metric-base" id="mb-revenue"></div><div class="metric-val" id="m-revenue">—</div><div class="metric-delta" id="md-revenue"></div></div>
-      <div class="metric"><div class="metric-label">ระดับความเสี่ยง</div><div class="metric-base"></div><div class="metric-val" id="m-risk">—</div><div class="metric-delta" id="md-risk"></div></div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">โครงสร้างต้นทุน — เปรียบเทียบ Baseline vs ปัจจุบัน</div>
-      <div class="legend">
-        <span class="leg-item"><span class="leg-dot" style="background:#5b91d8"></span>ต้นทุน Baseline</span>
-        <span class="leg-item"><span class="leg-dot" style="background:#e05252"></span>ต้นทุนที่เพิ่มขึ้น</span>
-        <span class="leg-item"><span class="leg-dot" style="background:#4caf7e"></span>รายได้ที่ชดเชยได้</span>
-      </div>
-      <div class="chart-wrap" style="height:280px"><canvas id="waterfallChart"></canvas></div>
-    </div>
-    <div class="interpretation" id="interpretation">กำลังวิเคราะห์...</div>
-  </div>
-
-  <!-- TAB: 5 เสาหลัก -->
-  <div id="tab-pillars" class="panel">
-    <div class="card">
-      <div class="card-title">คะแนนความพร้อมโดยรวม</div>
-      <div style="display:flex;align-items:flex-end;gap:1.5rem;flex-wrap:wrap">
-        <div><div class="score-big" id="overall-score">0%</div><div class="score-label" id="overall-label">ปรับระดับความพร้อมด้านล่าง</div></div>
-        <div style="flex:1;min-width:200px"><div class="pbar" style="height:8px"><div class="pbar-fill" id="overall-bar" style="width:0%;background:var(--red)"></div></div></div>
-      </div>
-    </div>
-    <div class="pillar-grid" id="pillar-summary"></div>
-    <div id="readiness-section"></div>
-  </div>
-
-  <!-- TAB: เปรียบเทียบ 3 ระดับ -->
-  <div id="tab-compare" class="panel">
-    <div class="sc-grid" id="sc-grid"></div>
-    <div class="card">
-      <div class="card-title">ลำดับความสำคัญของผู้บริหารตามสถานการณ์</div>
-      <div style="overflow-x:auto">
-        <table>
-          <thead><tr><th>มาตรการ</th><th>ระดับเบา</th><th>ระดับกลาง</th><th>ระดับรุนแรง</th></tr></thead>
-          <tbody>
-            <tr><td>ติดตามต้นทุนรายสัปดาห์</td><td><span class="badge badge-green">ปกติ</span></td><td><span class="badge badge-amber">เร่งด่วน</span></td><td><span class="badge badge-red">วิกฤต</span></td></tr>
-            <tr><td>เปิดใช้สต็อกสำรอง</td><td><span class="badge badge-green">ไม่จำเป็น</span></td><td><span class="badge badge-amber">เปิดใช้</span></td><td><span class="badge badge-red">ใช้เต็มที่</span></td></tr>
-            <tr><td>เจรจาสัญญาซัพพลายเออร์</td><td><span class="badge badge-blue">เตรียมการ</span></td><td><span class="badge badge-amber">เริ่มดำเนินการ</span></td><td><span class="badge badge-red">ทันที</span></td></tr>
-            <tr><td>ปรับราคาขาย</td><td><span class="badge badge-green">บางส่วน</span></td><td><span class="badge badge-amber">50–70%</span></td><td><span class="badge badge-red">ทบทวนทั้งหมด</span></td></tr>
-            <tr><td>เปิดใช้พลังงานทางเลือก</td><td><span class="badge badge-blue">ติดตาม</span></td><td><span class="badge badge-amber">เร่งแผน</span></td><td><span class="badge badge-red">ฉุกเฉิน</span></td></tr>
-            <tr><td>AI เพิ่มประสิทธิภาพการผลิต</td><td><span class="badge badge-blue">วางแผน</span></td><td><span class="badge badge-amber">นำร่อง</span></td><td><span class="badge badge-red">ปรับใช้ทั้งหมด</span></td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-title">เปรียบเทียบผลกระทบ 3 สถานการณ์</div>
-      <div class="legend">
-        <span class="leg-item"><span class="leg-dot" style="background:#4caf7e"></span>ระดับเบา</span>
-        <span class="leg-item"><span class="leg-dot" style="background:#e8a230"></span>ระดับกลาง</span>
-        <span class="leg-item"><span class="leg-dot" style="background:#e05252"></span>ระดับรุนแรง</span>
-      </div>
-      <div class="chart-wrap" style="height:260px"><canvas id="scenarioChart"></canvas></div>
+<!-- TAB: COMPARE -->
+<div id="tab-compare" class="panel">
+  <div class="scgrid" id="scgrid"></div>
+  <div class="card">
+    <div class="card-title">ลำดับความสำคัญตามสถานการณ์</div>
+    <div style="overflow-x:auto">
+      <table>
+        <thead><tr><th>มาตรการ</th><th>ระดับเบา</th><th>ระดับกลาง</th><th>ระดับรุนแรง</th></tr></thead>
+        <tbody>
+          <tr><td>ติดตามต้นทุนรายสัปดาห์</td><td><span class="badge badge-green">ปกติ</span></td><td><span class="badge badge-amber">เร่งด่วน</span></td><td><span class="badge badge-red">วิกฤต</span></td></tr>
+          <tr><td>เปิดใช้สต็อกสำรอง</td><td><span class="badge badge-green">ไม่จำเป็น</span></td><td><span class="badge badge-amber">เปิดใช้</span></td><td><span class="badge badge-red">ใช้เต็มที่</span></td></tr>
+          <tr><td>เจรจาสัญญาซัพพลายเออร์</td><td><span class="badge badge-blue">เตรียมการ</span></td><td><span class="badge badge-amber">เริ่มดำเนินการ</span></td><td><span class="badge badge-red">ทันที</span></td></tr>
+          <tr><td>ปรับราคาขาย</td><td><span class="badge badge-green">บางส่วน</span></td><td><span class="badge badge-amber">50–70%</span></td><td><span class="badge badge-red">ทบทวนทั้งหมด</span></td></tr>
+          <tr><td>พลังงานทางเลือก/โซลาร์</td><td><span class="badge badge-blue">ติดตาม</span></td><td><span class="badge badge-amber">เร่งแผน</span></td><td><span class="badge badge-red">ฉุกเฉิน</span></td></tr>
+          <tr><td>AI เพิ่มประสิทธิภาพการผลิต</td><td><span class="badge badge-blue">วางแผน</span></td><td><span class="badge badge-amber">นำร่อง</span></td><td><span class="badge badge-red">ปรับใช้ทั้งหมด</span></td></tr>
+          <tr><td>ปรับเส้นทางโลจิสติกส์</td><td><span class="badge badge-green">เตรียมพร้อม</span></td><td><span class="badge badge-amber">ประเมิน</span></td><td><span class="badge badge-red">ดำเนินการ</span></td></tr>
+        </tbody>
+      </table>
     </div>
   </div>
-
-  <!-- TAB: รายการตรวจสอบ -->
-  <div id="tab-actions" class="panel">
-    <div class="card">
-      <div class="card-title" style="display:flex;justify-content:space-between;align-items:center">
-        <span>ความคืบหน้าการเตรียมการ</span>
-        <span id="check-progress" style="font-size:13px;color:var(--accent2);font-weight:600">0 / 0 รายการ</span>
-      </div>
-      <div class="pbar"><div class="pbar-fill" id="check-bar" style="width:0%;background:var(--accent)"></div></div>
+  <div class="card">
+    <div class="card-title">เปรียบเทียบผลกระทบ 3 สถานการณ์</div>
+    <div class="legend">
+      <span class="legitem"><span class="legdot" style="background:#4caf7e"></span>ระดับเบา</span>
+      <span class="legitem"><span class="legdot" style="background:#e8a230"></span>ระดับกลาง</span>
+      <span class="legitem"><span class="legdot" style="background:#e05252"></span>ระดับรุนแรง</span>
     </div>
-    <div id="checklist-container"></div>
+    <div style="position:relative;height:260px"><canvas id="scChart"></canvas></div>
   </div>
+</div>
+
+<!-- TAB: ACTIONS -->
+<div id="tab-actions" class="panel">
+  <div class="card">
+    <div class="card-title" style="display:flex;justify-content:space-between;align-items:center">
+      <span>ความคืบหน้าการเตรียมการ</span>
+      <span id="cl-prog" style="font-size:13px;color:var(--accent2);font-weight:600">0 / 0 รายการ</span>
+    </div>
+    <div class="pbar"><div class="pbar-fill" id="cl-bar" style="width:0%;background:var(--accent)"></div></div>
+  </div>
+  <div id="cl-container"></div>
+</div>
 
 </main>
-<footer class="footer">War Game Planner v3 · Supply Origin Engine · Baseline vs ปัจจุบัน · วิเคราะห์โดย Claude AI · สำหรับใช้ภายในองค์กรเท่านั้น</footer>
-
+<footer class="footer">War Game Planner v3 · Supply Source Impact · AI-Powered · สำหรับใช้ภายในองค์กรเท่านั้น</footer>
 <script>
-// ── STATE ──────────────────────────────────────────────
-let wChart=null, sChart=null;
-const readinessState={}, checkState={};
-let baselineData = { cost:160, price:200, date:'2026-02-27' };
-let currentAIData = null;
+// ============================================================
+//  WAR GAME PLANNER v3  —  Supply Source + AI Baseline Compare
+// ============================================================
 
-// ── LOADING ────────────────────────────────────────────
-function setStep(n,state){
-  const el=document.getElementById('step-'+n);
-  el.className='loading-step '+state;
-  const icons=['','🌐','🚢','🤖','📊'];
-  if(state==='done') el.querySelector('.step-icon').textContent='✅';
-  else if(state==='error') el.querySelector('.step-icon').textContent='⚠️';
-  else el.querySelector('.step-icon').textContent=icons[n];
-  document.getElementById('loading-bar').style.width=(n*25)+'%';
+// --- STATE ---
+var wfChart = null, scChart = null;
+var rState = {}, ckState = {};
+var BL = { cost: 500, price: 700, date: '2026-02-27' };
+
+// Supply source config: logMult = logistics multiplier vs base, rawMult = raw material multiplier
+var SRCS = {
+  cn:  { logMult: 1.00, rawMult: 1.00, impact: 'med',  label: 'กระทบปานกลาง' },
+  th:  { logMult: 0.10, rawMult: 0.70, impact: 'low',  label: 'กระทบน้อย' },
+  mfg: { logMult: 0.05, rawMult: 0.60, impact: 'low',  label: 'กระทบน้อย' },
+  me:  { logMult: 2.50, rawMult: 1.50, impact: 'high', label: 'กระทบสูงมาก' },
+  eu:  { logMult: 1.60, rawMult: 0.90, impact: 'med',  label: 'กระทบปานกลาง' }
+};
+var wLogMult = 1.0, wRawMult = 1.0;
+
+// --- LOADING ---
+function lstep(n, state) {
+  var el = document.getElementById('ls' + n);
+  el.className = 'lstep ' + state;
+  var icons = { 1:'🌐', 2:'🚢', 3:'🤖', 4:'📊' };
+  el.querySelector('.stepico').textContent = state === 'done' ? '✅' : state === 'error' ? '⚠️' : icons[n];
+  document.getElementById('lbar').style.width = (n * 25) + '%';
 }
-function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
+function sleep(ms) { return new Promise(function(r){ setTimeout(r, ms); }); }
 
-async function startupSequence(){
-  setStep(1,'active'); await sleep(500);
-  setStep(1,'done'); setStep(2,'active'); await sleep(600);
-  setStep(2,'done'); setStep(3,'active');
-  document.getElementById('loading-bar').style.width='60%';
-  await runCurrentAnalysis();
-  setStep(3,'done'); setStep(4,'active'); await sleep(400);
-  setStep(4,'done');
-  document.getElementById('loading-bar').style.width='100%';
+async function startupSeq() {
+  lstep(1,'active'); await sleep(500);
+  lstep(1,'done'); lstep(2,'active'); await sleep(600);
+  lstep(2,'done'); lstep(3,'active');
+  document.getElementById('lbar').style.width = '60%';
+  await fetchCurrentAI();
+  lstep(3,'done'); lstep(4,'active'); await sleep(400);
+  lstep(4,'done');
+  document.getElementById('lbar').style.width = '100%';
   await sleep(500);
-  const ov=document.getElementById('loading-overlay');
-  ov.style.transition='opacity 0.5s'; ov.style.opacity='0';
-  setTimeout(()=>ov.style.display='none',500);
+  var ov = document.getElementById('loading-overlay');
+  ov.style.transition = 'opacity 0.5s';
+  ov.style.opacity = '0';
+  setTimeout(function(){ ov.style.display = 'none'; }, 500);
 }
 
-// ── AI: CURRENT SITUATION (page load) ─────────────────
-async function runCurrentAnalysis(){
-  const prompt = [
-    'You are a business risk analyst for ASEAN supply chains.',
-    '',
-    'VERIFIED DATA mid-March 2026:',
-    '- War started: Feb 28 2026. Brent pre-war (Feb 27): $71/bbl. Brent now: $100-104/bbl',
-    '- Strait of Hormuz: closed, traffic down over 70%. All major carriers suspended Gulf bookings.',
-    '- Emergency surcharges: Maersk $200/TEU, Hapag-Lloyd war risk $1500/TEU',
+// --- AI: CURRENT SITUATION ---
+async function fetchCurrentAI() {
+  var promptLines = [
+    'You are a risk analyst for ASEAN supply chains. Mid-March 2026 verified data:',
+    '- War started Feb 28 2026. Brent pre-war Feb 27: $71/bbl. Brent now: $100-104/bbl.',
+    '- Strait of Hormuz closed. All major carriers suspended Gulf bookings.',
+    '- Maersk emergency bunker surcharge $200/TEU. Hapag-Lloyd war risk $1500/TEU.',
     '- Container spot rates rising 10% per week. LNG/LPG supply disrupted.',
-    '- Raw material (petrochemicals, polymers) under supply pressure.',
-    '',
-    'Return ONLY a raw JSON object, no markdown fences, no explanation.',
-    'Use this exact structure:',
+    '- Petrochemicals/polymers under supply pressure due to Middle East disruption.',
+    'Return ONLY a JSON object, no markdown, no explanation:',
     '{"oil":30,"logistics":25,"rawmat":14,"energy":25,"vol":8,"price":8,',
-    '"current_oil_price":102,',
-    '"current_logistics_index":"สูงมาก Emergency Surcharge ทุกสายเรือ",',
-    '"summary_th":"สรุปสถานการณ์ปัจจุบัน 2-3 ประโยค",',
-    '"risk_level":"สูง",',
-    '"data_date":"มีนาคม 2569"}'
-  ].join('\n');
-  try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:800,
-        messages:[{role:'user',content:prompt}]})
+    '"cur_oil":102,"summary":"2-3 sentence English summary of current situation",',
+    '"risk":"high","date":"March 2026"}'
+  ];
+  try {
+    var res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 600,
+        messages: [{ role: 'user', content: promptLines.join('\n') }]
+      })
     });
-    const data=await res.json();
-    let txt='';
-    for(const b of data.content) if(b.type==='text') txt+=b.text;
-    txt=txt.replace(/```json|```/g,'').trim();
-    const m=txt.match(/\{[\s\S]*\}/);
-    if(!m) throw new Error('no json');
-    currentAIData=JSON.parse(m[0]);
-  }catch(e){
-    currentAIData={oil:30,logistics:25,rawmat:14,energy:25,vol:8,price:8,
-      current_oil_price:102,
-      current_logistics_index:'สูงมาก — Emergency Surcharge ทุกสายเรือ',
-      summary_th:'สงครามตะวันออกกลางที่เริ่มขึ้นวันที่ 28 กุมภาพันธ์ 2569 ส่งผลให้ราคาน้ำมัน Brent พุ่งขึ้นจาก $71 เป็นกว่า $100/บาร์เรล ช่องแคบฮอร์มุซถูกปิดทำให้ต้นทุนโลจิสติกส์พุ่งสูงและวัตถุดิบขาดแคลน',
-      risk_level:'สูง',data_date:'มีนาคม 2569'};
+    var data = await res.json();
+    var txt = '';
+    data.content.forEach(function(b){ if (b.type === 'text') txt += b.text; });
+    txt = txt.replace(/```json|```/g, '').trim();
+    var m = txt.match(/\{[\s\S]*\}/);
+    if (!m) throw new Error('no json');
+    var v = JSON.parse(m[0]);
+    applyAI(v);
+  } catch(e) {
+    applyAI({ oil:30, logistics:25, rawmat:14, energy:25, vol:8, price:8,
+      cur_oil:102, summary:'War started Feb 28 2026. Brent surged from $71 to $102/bbl. Strait of Hormuz closed, all major carriers issued emergency surcharges. Middle East-origin goods face highest disruption.',
+      risk:'high', date:'March 2026' });
   }
-  applyCurrentValues(currentAIData);
 }
 
-// ── AI: BASELINE DATE ANALYSIS ─────────────────────────
-async function runBaselineAnalysis(){
-  const dateVal=document.getElementById('baseline-date').value;
-  const costVal=parseFloat(document.getElementById('baseline-cost').value)||160;
-  const priceVal=parseFloat(document.getElementById('baseline-price').value)||200;
-  if(!dateVal){alert('กรุณาเลือกวันที่อ้างอิงก่อน');return}
+function applyAI(v) {
+  document.getElementById('s-oil').value   = v.oil      || 30;
+  document.getElementById('s-log').value   = v.logistics|| 25;
+  document.getElementById('s-raw').value   = v.rawmat   || 14;
+  document.getElementById('s-en').value    = v.energy   || 25;
+  document.getElementById('s-vol').value   = v.vol      || 8;
+  document.getElementById('s-price').value = v.price    || 8;
+  document.getElementById('ai-set-label').textContent = 'ตั้งค่าโดย AI จากข้อมูลจริง ✅';
+  if (v.summary) {
+    document.getElementById('ai-body').textContent = v.summary;
+    document.getElementById('ai-meta').textContent = 'Risk: ' + (v.risk||'high').toUpperCase() + ' | Oil: $' + (v.cur_oil||102) + '/bbl | ' + (v.date||'March 2026');
+    document.getElementById('aibanner').style.display = 'flex';
+  }
+  recalc();
+}
 
-  baselineData={cost:costVal,price:priceVal,date:dateVal};
-  const btn=document.getElementById('analyze-btn');
-  btn.disabled=true; btn.textContent='⏳ กำลังวิเคราะห์...';
+// --- AI: BASELINE ANALYSIS ---
+async function runAnalysis() {
+  var dateVal  = document.getElementById('bl-date').value;
+  var costVal  = parseFloat(document.getElementById('bl-cost').value)  || 500;
+  var priceVal = parseFloat(document.getElementById('bl-price').value) || 700;
+  if (!dateVal) { alert('กรุณาเลือกวันที่อ้างอิงก่อน'); return; }
+  BL = { cost: costVal, price: priceVal, date: dateVal };
 
-  const displayDate=new Date(dateVal).toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric'});
-  const baseMarginBaht = (priceVal - costVal).toFixed(1);
-  const baseMarginPctCalc = (((priceVal - costVal) / priceVal) * 100).toFixed(1);
-  const prompt = [
-    'You are a business risk analyst. Compare costs on a specific date vs today (mid-March 2026).',
-    '',
+  var btn = document.getElementById('analyze-btn');
+  btn.disabled = true;
+  btn.textContent = '⏳ กำลังวิเคราะห์...';
+
+  var dispDate = new Date(dateVal).toLocaleDateString('th-TH', { year:'numeric', month:'long', day:'numeric' });
+  var srcMix = getSrcMix();
+  var srcDesc = 'China ' + srcMix.cn + '%, Thai supplier ' + srcMix.th + '%, In-house ' + srcMix.mfg + '%, Middle East ' + srcMix.me + '%, Europe/US ' + srcMix.eu + '%';
+  var baseMargin = (priceVal - costVal).toFixed(1);
+  var baseMarginPct = ((priceVal - costVal) / priceVal * 100).toFixed(1);
+
+  var promptLines = [
+    'Business risk analyst. Compare supply costs on a baseline date vs today mid-March 2026.',
     'Baseline date: ' + dateVal,
     'Baseline cost per case: THB ' + costVal,
-    'Baseline selling price per case: THB ' + priceVal,
-    'Baseline margin per case: THB ' + baseMarginBaht + ' (' + baseMarginPctCalc + '%)',
-    '',
-    'TODAY mid-March 2026 known facts:',
-    '- Brent oil: approx $102/bbl (was $71 on Feb 27 2026 pre-war; $76 in Jan 2026; $80 mid-2025)',
+    'Baseline price per case: THB ' + priceVal,
+    'Baseline margin: THB ' + baseMargin + ' (' + baseMarginPct + '%)',
+    'Supply source mix: ' + srcDesc,
+    'Logistics multiplier (weighted): ' + wLogMult.toFixed(2) + 'x vs China baseline',
+    'Today mid-March 2026 facts:',
+    '- Brent oil now $102/bbl. Was $71 on Feb 27 2026. Was $76 Jan 2026. Was $80 mid-2025.',
     '- War started Feb 28 2026. Strait of Hormuz closed.',
-    '- Logistics: emergency surcharges $200/TEU from all major carriers',
-    '- Raw materials: petrochemicals/polymers up 12-15%',
-    '- Energy: LNG/LPG up 20-25% in Asia',
-    '',
-    'For baseline date ' + dateVal + ', estimate the global situation.',
-    'Then calculate cost changes from that date to now.',
-    '',
-    'Return ONLY a raw JSON object, no markdown fences, no explanation, no angle brackets.',
-    'Use this exact structure with real numeric values:',
-    '{',
-    '  "baseline_oil_price": 71,',
-    '  "baseline_logistics": "ปกติ ไมมี surcharge พิเศษ",',
-    '  "baseline_rawmat_index": "ปกติ",',
-    '  "baseline_energy_index": "ปกติ",',
-    '  "current_oil_price": 102,',
-    '  "oil_increase_usd": 31,',
-    '  "logistics_increase_thb": 25,',
-    '  "rawmat_increase_pct": 14,',
-    '  "energy_increase_pct": 25,',
-    '  "total_cost_add_thb": 38,',
-    '  "new_total_cost_thb": 198,',
-    '  "new_margin_thb": 2,',
-    '  "new_margin_pct": 1.0,',
-    '  "margin_change_thb": -38,',
-    '  "margin_change_pct": -19.0,',
-    '  "recommended_price_increase_pct": 12,',
-    '  "summary_th": "สรุปสถานการณ์เป็นภาษาไทย 3-4 ประโยค พรอมตัวเลขจริง",',
-    '  "risk_level": "สูง",',
-    '  "vol_decline_pct": 8',
-    '}'
-  ].join('\n');
+    '- Middle East/India routes: suspended or war risk surcharge $1500/TEU.',
+    '- China routes: bunker surcharge $200/TEU, spot rates +10%/week.',
+    '- Thai/domestic: minimal logistics war impact.',
+    '- Petrochemicals/polymers up 12-15%. Energy LNG/LPG up 20-25% Asia.',
+    'Calculate cost increases accounting for the supply source mix.',
+    'Return ONLY a JSON object, no markdown, no explanation:',
+    '{"bl_oil":71,"bl_log":"Normal no surcharge","bl_raw":"Normal","bl_en":"Normal",',
+    '"cur_oil":102,"oil_inc":31,"log_inc_thb":25,"raw_inc_pct":14,"en_inc_pct":25,',
+    '"cost_add":38,"new_cost":538,"new_margin":162,"new_margin_pct":23.1,',
+    '"margin_chg_thb":-38,"margin_chg_pp":-5.4,"price_inc_needed":8,',
+    '"summary":"English 3-4 sentences comparing baseline vs now with numbers and source mix impact",',
+    '"risk":"high","vol_dec":8}'
+  ];
 
-
-  let result;
-  try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,
-        messages:[{role:'user',content:prompt}]})
+  var result;
+  try {
+    var res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 900,
+        messages: [{ role: 'user', content: promptLines.join('\n') }]
+      })
     });
-    const data=await res.json();
-    let txt='';
-    for(const b of data.content) if(b.type==='text') txt+=b.text;
-    txt=txt.replace(/```json|```/g,'').trim();
-    const m=txt.match(/\{[\s\S]*\}/);
-    if(!m) throw new Error('no json');
-    result=JSON.parse(m[0]);
-  }catch(e){
-    // Fallback calculation based on known data
-    const isPreWar=new Date(dateVal)<new Date('2026-02-28');
-    result={
-      baseline_oil_price: isPreWar?71:85,
-      baseline_logistics: isPreWar?'ปกติ — ไม่มี surcharge พิเศษ':'เริ่มมี surcharge บางสายเรือ',
-      baseline_rawmat_index: isPreWar?'ปกติ':'เริ่มผันผวน',
-      baseline_energy_index: isPreWar?'ปกติ':'เพิ่มขึ้นบางส่วน',
-      current_oil_price:102,
-      oil_increase_usd: isPreWar?31:17,
-      logistics_increase_thb: isPreWar?25:15,
-      rawmat_increase_pct: isPreWar?14:8,
-      energy_increase_pct: isPreWar?25:12,
-      total_cost_add_thb: isPreWar?+(25+costVal*0.4*0.14+costVal*0.15*0.25+31*0.05).toFixed(1):20,
-      new_total_cost_thb: 0,
-      new_margin_thb:0, new_margin_pct:0,
-      margin_change_thb:0, margin_change_pct:0,
-      recommended_price_increase_pct: isPreWar?12:7,
-      summary_th: isPreWar
-        ? 'ณ วันที่ ' + displayDate + ' สถานการณ์โลกยังปกติ น้ำมัน Brent อยู่ที่ประมาณ $71/บาร์เรล และช่องแคบฮอร์มุซยังเปิดอยู่ ต้นทุนโลจิสติกส์อยู่ในระดับปกติ เมื่อเทียบกับปัจจุบัน (มีนาคม 2569) ที่น้ำมันพุ่งเป็น $102/บาร์เรล และช่องแคบฮอร์มุซปิด ส่งผลให้ต้นทุนต่อลังเพิ่มขึ้นอย่างมีนัยสำคัญ'
-        : 'ณ วันที่ ' + displayDate + ' สงครามเพิ่งเริ่มต้น ราคาน้ำมันเริ่มผันผวน เมื่อเทียบกับปัจจุบันที่สถานการณ์รุนแรงขึ้นต่อเนื่อง ต้นทุนทุกด้านเพิ่มสูงขึ้น',
-      risk_level:'สูง',
-      vol_decline_pct:8
+    var data = await res.json();
+    var txt = '';
+    data.content.forEach(function(b){ if (b.type === 'text') txt += b.text; });
+    txt = txt.replace(/```json|```/g, '').trim();
+    var m = txt.match(/\{[\s\S]*\}/);
+    if (!m) throw new Error('no json');
+    result = JSON.parse(m[0]);
+  } catch(e) {
+    var isPreWar = new Date(dateVal) < new Date('2026-02-28');
+    var costAdd = isPreWar ? +(25 * wLogMult + costVal * 0.4 * 0.14 * wRawMult + costVal * 0.15 * 0.25 + 31 * 0.05).toFixed(1) : 20;
+    result = {
+      bl_oil: isPreWar ? 71 : 85,
+      bl_log: isPreWar ? 'Normal, no surcharge' : 'War just started, some surcharges',
+      bl_raw: isPreWar ? 'Normal' : 'Beginning to rise',
+      bl_en:  isPreWar ? 'Normal' : 'Rising',
+      cur_oil: 102, oil_inc: isPreWar ? 31 : 17,
+      log_inc_thb: +(25 * wLogMult).toFixed(1),
+      raw_inc_pct: +(14 * wRawMult).toFixed(1),
+      en_inc_pct: 25, cost_add: costAdd,
+      new_cost: +(costVal + costAdd).toFixed(1),
+      new_margin: +(priceVal - costVal - costAdd).toFixed(1),
+      new_margin_pct: +((priceVal - costVal - costAdd) / priceVal * 100).toFixed(1),
+      margin_chg_thb: -costAdd,
+      margin_chg_pp: +(-costAdd / priceVal * 100).toFixed(1),
+      price_inc_needed: +(costAdd / priceVal * 100).toFixed(1),
+      summary: isPreWar
+        ? 'On ' + dispDate + ', situation was normal. Brent ~$71/bbl, Hormuz open, no surcharges. Today March 2026, war disrupts Middle East routes, Brent at $102. Cost impact weighted by your source mix (' + srcDesc + ').'
+        : 'On ' + dispDate + ', war had just started. Compared to today, disruption has intensified further across all routes.',
+      risk: 'high', vol_dec: 8
     };
   }
 
-  // Fill in computed fields if missing
-  const totalAdd=result.total_cost_add_thb||0;
-  result.new_total_cost_thb=+(costVal+totalAdd).toFixed(1);
-  const baseMarginThb=priceVal-costVal;
-  const baseMarginPct=((priceVal-costVal)/priceVal*100);
-  result.new_margin_thb=+(priceVal-result.new_total_cost_thb).toFixed(1);
-  result.new_margin_pct=+((result.new_margin_thb/priceVal)*100).toFixed(1);
-  result.margin_change_thb=+(result.new_margin_thb-baseMarginThb).toFixed(1);
-  result.margin_change_pct=+(result.new_margin_pct-baseMarginPct).toFixed(1);
-
-  renderComparison(result, dateVal, costVal, priceVal, displayDate);
-  updateSlidersFromBaseline(result);
-  updateAIBanner(result);
-
-  btn.disabled=false; btn.textContent='🔍 วิเคราะห์เปรียบเทียบ';
+  renderCompare(result, dispDate, costVal, priceVal);
+  applySliders(result);
+  updateAIBanner(result, dispDate);
+  btn.disabled = false;
+  btn.textContent = '🔍 วิเคราะห์เปรียบเทียบ';
 }
 
-// ── RENDER COMPARISON PANEL ────────────────────────────
-function renderComparison(r, dateVal, baseCost, basePrice, displayDate){
-  const baseMarginThb=basePrice-baseCost;
-  const baseMarginPct=((baseMarginThb/basePrice)*100).toFixed(1);
+function renderCompare(r, dispDate, baseCost, basePrice) {
+  var bmThb = basePrice - baseCost;
+  var bmPct = (bmThb / basePrice * 100).toFixed(1);
+  document.getElementById('c-base-date').textContent = dispDate;
+  document.getElementById('c-base-rows').innerHTML =
+    crow('ราคาน้ำมัน', '$' + (r.bl_oil||71) + '/bbl', false) +
+    crow('โลจิสติกส์', r.bl_log || 'ปกติ', false) +
+    crow('วัตถุดิบ', r.bl_raw || 'ปกติ', false) +
+    crow('พลังงาน', r.bl_en || 'ปกติ', false) +
+    crow('ต้นทุน/ลัง', 'THB ' + baseCost.toFixed(1), false) +
+    crow('มาร์จิน/ลัง', 'THB ' + bmThb.toFixed(1) + ' (' + bmPct + '%)', false);
+  document.getElementById('c-now-rows').innerHTML =
+    crow('ราคาน้ำมัน', '$' + (r.cur_oil||102) + '/bbl (+$' + (r.oil_inc||31) + ')', true) +
+    crow('โลจิสติกส์', 'Emergency Surcharge ทุกสายเรือ', true) +
+    crow('วัตถุดิบ', '+' + (r.raw_inc_pct||14) + '%', true) +
+    crow('พลังงาน', '+' + (r.en_inc_pct||25) + '%', true) +
+    crow('ต้นทุน/ลัง', 'THB ' + (r.new_cost||0) + ' (+' + (r.cost_add||0) + ')', true) +
+    crow('มาร์จิน/ลัง', 'THB ' + (r.new_margin||0) + ' (' + (r.new_margin_pct||0) + '%)', r.new_margin < bmThb);
+  document.getElementById('chero').style.display = 'grid';
 
-  document.getElementById('col-base-date').textContent=displayDate;
-  document.getElementById('col-now-date').textContent='มีนาคม 2569 (ปัจจุบัน)';
-
-  document.getElementById('col-base-rows').innerHTML=`
-    <div class="col-row"><span class="col-row-key">ราคาน้ำมัน</span><span class="col-row-val">$${r.baseline_oil_price}/bbl</span></div>
-    <div class="col-row"><span class="col-row-key">โลจิสติกส์</span><span class="col-row-val">${r.baseline_logistics}</span></div>
-    <div class="col-row"><span class="col-row-key">วัตถุดิบ</span><span class="col-row-val">${r.baseline_rawmat_index}</span></div>
-    <div class="col-row"><span class="col-row-key">พลังงาน</span><span class="col-row-val">${r.baseline_energy_index}</span></div>
-    <div class="col-row"><span class="col-row-key">ต้นทุน/ลัง</span><span class="col-row-val">฿${baseCost.toFixed(1)}</span></div>
-    <div class="col-row"><span class="col-row-key">มาร์จิน/ลัง</span><span class="col-row-val">฿${baseMarginThb.toFixed(1)} (${baseMarginPct}%)</span></div>`;
-
-  document.getElementById('col-now-rows').innerHTML=`
-    <div class="col-row"><span class="col-row-key">ราคาน้ำมัน</span><span class="col-row-val up">$${r.current_oil_price}/bbl (+$${r.oil_increase_usd})</span></div>
-    <div class="col-row"><span class="col-row-key">โลจิสติกส์</span><span class="col-row-val up">Emergency Surcharge ทุกสายเรือ</span></div>
-    <div class="col-row"><span class="col-row-key">วัตถุดิบ</span><span class="col-row-val up">+${r.rawmat_increase_pct}%</span></div>
-    <div class="col-row"><span class="col-row-key">พลังงาน</span><span class="col-row-val up">+${r.energy_increase_pct}%</span></div>
-    <div class="col-row"><span class="col-row-key">ต้นทุน/ลัง</span><span class="col-row-val up">฿${r.new_total_cost_thb} (+฿${r.total_cost_add_thb})</span></div>
-    <div class="col-row"><span class="col-row-key">มาร์จิน/ลัง</span><span class="col-row-val ${r.new_margin_thb<0?'up':r.margin_change_thb<0?'up':'down'}">฿${r.new_margin_thb} (${r.new_margin_pct}%)</span></div>`;
-
-  document.getElementById('compare-hero').style.display='grid';
-
-  // Delta grid
-  const pctChg=(a,b)=>b===0?0:+((a-b)/Math.abs(b)*100).toFixed(1);
-  const deltas=[
-    {label:'ต้นทุน/ลัง (฿)',base:`฿${baseCost.toFixed(0)} (Baseline)`,now:`฿${r.new_total_cost_thb}`,change:`+฿${r.total_cost_add_thb}`,pct:pctChg(r.new_total_cost_thb,baseCost),dir:'up'},
-    {label:'มาร์จิน/ลัง (฿)',base:`฿${baseMarginThb.toFixed(0)} (Baseline)`,now:`฿${r.new_margin_thb}`,change:`฿${r.margin_change_thb}`,pct:r.margin_change_pct,dir:r.margin_change_thb>=0?'down':'up'},
-    {label:'มาร์จิน (%)',base:`${baseMarginPct}% (Baseline)`,now:`${r.new_margin_pct}%`,change:`${r.margin_change_pct>0?'+':''}${r.margin_change_pct}pp`,pct:r.margin_change_pct,dir:r.margin_change_pct>=0?'down':'up'},
-    {label:'ราคาน้ำมัน',base:`$${r.baseline_oil_price}/bbl`,now:`$${r.current_oil_price}/bbl`,change:`+$${r.oil_increase_usd}`,pct:pctChg(r.current_oil_price,r.baseline_oil_price),dir:'up'},
-    {label:'ราคาขายที่ต้องปรับ',base:'ไม่ต้องปรับ',now:`+${r.recommended_price_increase_pct}%`,change:`+${r.recommended_price_increase_pct}%`,pct:r.recommended_price_increase_pct,dir:'neutral'},
-    {label:'ระดับความเสี่ยง',base:'ปกติ/ต่ำ',now:r.risk_level,change:r.risk_level,pct:null,dir:r.risk_level==='วิกฤต'||r.risk_level==='สูง'?'up':'neutral'},
+  // Delta cells
+  var bmPctNum = parseFloat(bmPct);
+  var deltas = [
+    { l:'ต้นทุน/ลัง (฿)', b:'THB '+baseCost, n:'THB '+(r.new_cost||0), chg:'+'+( (r.cost_add||0) ), pct:+((r.cost_add||0)/baseCost*100).toFixed(1), dir:'up' },
+    { l:'มาร์จิน/ลัง (฿)', b:'THB '+bmThb.toFixed(0), n:'THB '+(r.new_margin||0), chg:(r.margin_chg_thb||0), pct:(r.margin_chg_pp||0), dir:(r.new_margin||0)>=bmThb?'dn':'up' },
+    { l:'มาร์จิน (%)', b:bmPct+'%', n:(r.new_margin_pct||0)+'%', chg:(r.margin_chg_pp||0)+'pp', pct:(r.margin_chg_pp||0), dir:(r.margin_chg_pp||0)>=0?'dn':'up' },
+    { l:'ราคาน้ำมัน', b:'$'+(r.bl_oil||71)+'/bbl', n:'$'+(r.cur_oil||102)+'/bbl', chg:'+$'+(r.oil_inc||31), pct:+((r.oil_inc||31)/(r.bl_oil||71)*100).toFixed(1), dir:'up' },
+    { l:'ราคาขายต้องปรับ', b:'ไม่ต้องปรับ', n:'+'+(r.price_inc_needed||8)+'%', chg:'+'+(r.price_inc_needed||8)+'%', pct:(r.price_inc_needed||8), dir:'neu' },
+    { l:'Supply Source Impact', b:'Baseline', n:'Weighted '+wLogMult.toFixed(2)+'x', chg:wLogMult.toFixed(2)+'x', pct:null, dir: wLogMult>1.5?'up':wLogMult>1?'neu':'dn' }
   ];
-  const dg=document.getElementById('delta-grid');
-  dg.innerHTML=deltas.map(d=>`
-    <div class="delta-cell">
-      <div class="delta-cell-label">${d.label}</div>
-      <div class="delta-cell-base">${d.base}</div>
-      <div class="delta-cell-now">${d.now} (ปัจจุบัน)</div>
-      <div class="delta-cell-change ${d.dir==='up'?'up':d.dir==='down'?'down':'neutral'}">${d.pct!==null?`${d.pct>0?'+':''}${d.pct}%`:d.change}</div>
-    </div>`).join('');
-  document.getElementById('delta-bar').classList.add('visible');
+  var dg = document.getElementById('dgrid');
+  dg.innerHTML = deltas.map(function(d) {
+    return '<div class="dcell">' +
+      '<div class="dc-label">' + d.l + '</div>' +
+      '<div class="dc-base">' + d.b + ' (Baseline)</div>' +
+      '<div class="dc-now">' + d.n + ' (ปัจจุบัน)</div>' +
+      '<div class="dc-change ' + d.dir + '">' + (d.pct !== null ? (d.pct > 0 ? '+' : '') + d.pct + '%' : d.chg) + '</div>' +
+    '</div>';
+  }).join('');
+  document.getElementById('dbar').className = 'dbar on';
 
   // Update metric baselines
-  document.getElementById('mb-costcase').textContent=`Baseline: ฿0`;
-  document.getElementById('mb-totalcost').textContent=`Baseline: ฿${baseCost.toFixed(0)}`;
-  document.getElementById('mb-marginthb').textContent=`Baseline: ฿${baseMarginThb.toFixed(0)}`;
-  document.getElementById('mb-marginpct').textContent=`Baseline: ${baseMarginPct}%`;
+  document.getElementById('mb2').textContent = 'Baseline: THB ' + baseCost;
+  document.getElementById('mb3').textContent = 'Baseline: THB ' + bmThb.toFixed(0);
+  document.getElementById('mb4').textContent = 'Baseline: ' + bmPct + '%';
   recalc();
 }
 
-function updateSlidersFromBaseline(r){
-  document.getElementById('s-oil').value=r.oil_increase_usd||30;
-  document.getElementById('s-logistics').value=r.logistics_increase_thb||25;
-  document.getElementById('s-rawmat').value=r.rawmat_increase_pct||14;
-  document.getElementById('s-energy').value=r.energy_increase_pct||25;
-  document.getElementById('s-vol').value=r.vol_decline_pct||8;
-  document.getElementById('s-price').value=r.recommended_price_increase_pct||8;
+function crow(k, v, isUp) {
+  return '<div class="crow"><span class="k">' + k + '</span><span class="v' + (isUp ? ' up' : '') + '">' + v + '</span></div>';
+}
+
+function applySliders(r) {
+  document.getElementById('s-oil').value   = r.oil_inc         || 30;
+  document.getElementById('s-log').value   = +(25 * wLogMult).toFixed(0) || 25;
+  document.getElementById('s-raw').value   = r.raw_inc_pct     || 14;
+  document.getElementById('s-en').value    = r.en_inc_pct      || 25;
+  document.getElementById('s-vol').value   = r.vol_dec         || 8;
+  document.getElementById('s-price').value = r.price_inc_needed|| 8;
   recalc();
 }
 
-function updateAIBanner(r){
-  const nowTime = new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
-  document.getElementById('ai-summary').textContent = r.summary_th || '';
-  document.getElementById('ai-meta').innerHTML =
-    '<span>⚠️ ระดับความเสี่ยง: <strong style="color:var(--red)">' + (r.risk_level||'—') + '</strong></span>' +
-    ' &nbsp;|&nbsp; 🛢 น้ำมันปัจจุบัน: $' + (r.current_oil_price||102) + '/bbl' +
-    ' &nbsp;|&nbsp; อัปเดต: ' + nowTime;
-  document.getElementById('ai-banner').style.display = 'flex';
+function updateAIBanner(r, dispDate) {
+  document.getElementById('ai-body').textContent = r.summary || '';
+  document.getElementById('ai-meta').textContent = 'Risk: ' + (r.risk||'high').toUpperCase() + ' | Baseline: ' + dispDate + ' | Source Mult: ' + wLogMult.toFixed(2) + 'x | Updated: ' + new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
+  document.getElementById('aibanner').style.display = 'flex';
 }
 
-function applyCurrentValues(v){
-  document.getElementById('s-oil').value = v.oil||30;
-  document.getElementById('s-logistics').value = v.logistics||25;
-  document.getElementById('s-rawmat').value = v.rawmat||14;
-  document.getElementById('s-energy').value = v.energy||25;
-  document.getElementById('s-vol').value = v.vol||8;
-  document.getElementById('s-price').value = v.price||8;
-  document.getElementById('ai-set-label').textContent = 'ตั้งค่าโดย AI จากข้อมูลจริง ✅';
-  if(v.summary_th){
-    document.getElementById('ai-summary').textContent = v.summary_th;
-    document.getElementById('ai-meta').innerHTML =
-      '<span>⚠️ ระดับความเสี่ยง: <strong style="color:var(--red)">' + (v.risk_level||'สูง') + '</strong></span>' +
-      ' &nbsp;|&nbsp; 📅 ' + (v.data_date||'มีนาคม 2569');
-    document.getElementById('ai-banner').style.display = 'flex';
-  }
-  recalc();
-}
-
-// ── SIMULATOR ─────────────────────────────────────────
-function recalc(){
-  const oil=+document.getElementById('s-oil').value;
-  const logistics=+document.getElementById('s-logistics').value;
-  const rawmat=+document.getElementById('s-rawmat').value;
-  const energy=+document.getElementById('s-energy').value;
-  const vol=+document.getElementById('s-vol').value;
-  const priceUp=+document.getElementById('s-price').value;
-
-  document.getElementById('v-oil').textContent='+$'+oil;
-  document.getElementById('v-logistics').textContent='+฿'+logistics;
-  document.getElementById('v-rawmat').textContent='+'+rawmat+'%';
-  document.getElementById('v-energy').textContent='+'+energy+'%';
-  document.getElementById('v-vol').textContent='-'+vol+'%';
-  document.getElementById('v-price').textContent='+'+priceUp+'%';
-
-  const baseCost=baselineData.cost||160;
-  const baseRev=baselineData.price||200;
-  const baseMarginThb=baseRev-baseCost;
-  const baseMarginPct=(baseMarginThb/baseRev*100);
-
-  const logAdd=logistics;
-  const rawAdd=baseCost*0.4*rawmat/100;
-  const enAdd=baseCost*0.15*energy/100;
-  const oilAdd=oil*0.05;
-  const totalAdd=logAdd+rawAdd+enAdd+oilAdd;
-  const newRev=baseRev*(1+priceUp/100);
-  const newCost=baseCost+totalAdd;
-  const newMarginThb=newRev-newCost;
-  const newMarginPct=(newMarginThb/newRev*100);
-  const marginImpact=newMarginPct-baseMarginPct;
-  const revImpact=((1+priceUp/100)*(1-vol/100)-1)*100;
-  const breakevenPct=(totalAdd/baseRev*100);
-
-  const fmtB=v=>(v>=0?'+':'-')+'฿'+Math.abs(v).toFixed(1);
-  const fmt=(v,d=1)=>(v>=0?'+':'')+v.toFixed(d);
-  const fmtDelta=(now,base)=>{
-    const pct=base===0?0:((now-base)/Math.abs(base)*100);
-    const cls=pct>0?'up-txt':pct<0?'down-txt':'neu-txt';
-    return `<span class="${cls}">${pct>0?'+':''}${pct.toFixed(1)}% vs Baseline</span>`;
+// --- SUPPLY SOURCE LOGIC ---
+function getSrcMix() {
+  return {
+    cn:  parseFloat(document.getElementById('pct-cn').value)  || 0,
+    th:  parseFloat(document.getElementById('pct-th').value)  || 0,
+    mfg: parseFloat(document.getElementById('pct-mfg').value) || 0,
+    me:  parseFloat(document.getElementById('pct-me').value)  || 0,
+    eu:  parseFloat(document.getElementById('pct-eu').value)  || 0
   };
-
-  // Metrics with baseline comparison
-  setMetricFull('m-costcase',fmtB(totalAdd),'md-costcase',`<span class="up-txt">เพิ่มขึ้น ฿${totalAdd.toFixed(1)}</span>`,totalAdd>30?'red':totalAdd>15?'amber':'green');
-  setMetricFull('m-totalcost','฿'+newCost.toFixed(1),'md-totalcost',fmtDelta(newCost,baseCost),newCost>baseCost*1.2?'red':newCost>baseCost*1.1?'amber':'green');
-  setMetricFull('m-marginthb','฿'+newMarginThb.toFixed(1),'md-marginthb',fmtDelta(newMarginThb,baseMarginThb),newMarginThb<baseMarginThb*0.7?'red':newMarginThb<baseMarginThb*0.9?'amber':'green');
-  setMetricFull('m-marginpct',newMarginPct.toFixed(1)+'%','md-marginpct',`<span class="${marginImpact>=0?'down-txt':'up-txt'}">${fmt(marginImpact)}pp vs Baseline</span>`,marginImpact<-10?'red':marginImpact<-5?'amber':'green');
-  setMetricFull('m-revenue',fmt(revImpact)+'%','md-revenue',`<span class="${revImpact>=0?'down-txt':'up-txt'}">รายได้รวม</span>`,revImpact<-5?'red':revImpact<0?'amber':'green');
-  const riskTh=marginImpact<-10?'วิกฤต':marginImpact<-5?'สูง':marginImpact<-2?'ปานกลาง':'ต่ำ';
-  setMetricFull('m-risk',riskTh,'md-risk',`<span style="color:var(--text3)">Break-even: +${breakevenPct.toFixed(1)}%</span>`,marginImpact<-10?'red':marginImpact<-5?'amber':'green');
-
-  const driver=logAdd>rawAdd&&logAdd>enAdd?'ต้นทุนโลจิสติกส์':rawAdd>enAdd?'ต้นทุนวัตถุดิบ':'ต้นทุนพลังงาน';
-  const recovery=priceUp>0?(priceUp/breakevenPct*100).toFixed(0):0;
-  const advice=revImpact<-5?'ปริมาณขายลดลงมีนัยสำคัญ — ควรพิจารณาการปรับราคาแบบค่อยเป็นค่อยไปเพื่อรักษาส่วนแบ่งตลาด'
-    :marginImpact<-5?'มาร์จินถูกกดดันอย่างมาก — เร่งแผนประสิทธิภาพและ AI เพื่อชดเชยส่วนต่าง'
-    :'สถานการณ์อยู่ในระดับที่จัดการได้ หากมีสต็อกสำรองและสัญญาซัพพลายเออร์รองรับ';
-
-  const marginColor = marginImpact < -5 ? 'var(--red)' : 'var(--green)';
-  const priceNote = priceUp > 0 ? 'การปรับราคาขาย ' + priceUp + '% ช่วยชดเชยต้นทุนได้ประมาณ ' + recovery + '% ' : '';
-  const costPct = ((totalAdd / baseCost) * 100).toFixed(1);
-  document.getElementById('interpretation').innerHTML =
-    '<strong style="color:var(--accent2)">เปรียบเทียบจาก Baseline (฿' + baseCost + '/ลัง มาร์จิน ' + baseMarginPct.toFixed(1) + '%) สูปัจจุบัน:</strong><br>' +
-    'ตนทุนตอลังเพิ่มขึ้น <strong style="color:var(--red)">฿' + totalAdd.toFixed(1) + '</strong> (' + costPct + '%) โดยมีสาเหตุหลักจาก' + driver + ' ' +
-    'มาร์จินเปลี่ยนจาก <strong>' + baseMarginPct.toFixed(1) + '%</strong> เปน <strong style="color:' + marginColor + '">' + newMarginPct.toFixed(1) + '%</strong> (' + fmt(marginImpact) + 'pp) ' +
-    priceNote + advice;
-
-  updateWaterfall(baseCost,logAdd,rawAdd,enAdd,oilAdd,Math.max(0,newRev-baseCost-totalAdd-baseMarginThb));
 }
 
-function setMetricFull(id,val,deltaId,deltaHtml,cls){
-  const el=document.getElementById(id);
-  el.textContent=val;
-  el.className='metric-val'+(cls?' '+cls:'');
-  const del=document.getElementById(deltaId);
-  if(del) del.innerHTML=deltaHtml;
+function onSrcChange() {
+  var mix = getSrcMix();
+  var total = mix.cn + mix.th + mix.mfg + mix.me + mix.eu;
+
+  var tn = document.getElementById('total-num');
+  tn.textContent = total + '%';
+  tn.className = 'total-num ' + (total === 100 ? 'ok' : total > 100 ? 'over' : 'warn');
+
+  var keys = ['cn','th','mfg','me','eu'];
+  keys.forEach(function(k) {
+    var pct = mix[k];
+    var src = SRCS[k];
+    var ib = document.getElementById('ib-' + k);
+    var id = document.getElementById('id-' + k);
+    if (pct === 0) {
+      ib.className = 'ibadge zero';
+      ib.textContent = '0% — ไม่ใช้';
+      if (id) id.textContent = '';
+    } else {
+      ib.className = 'ibadge ' + src.impact;
+      ib.textContent = src.label;
+      if (id) id.textContent = pct + '% ของทั้งหมด';
+    }
+  });
+
+  wLogMult = 0; wRawMult = 0;
+  keys.forEach(function(k) {
+    var w = mix[k] / 100;
+    wLogMult += w * SRCS[k].logMult;
+    wRawMult += w * SRCS[k].rawMult;
+  });
+
+  var wb = document.getElementById('wmult-badge');
+  var wlevel = wLogMult > 1.8 ? 'high' : wLogMult > 1.0 ? 'med' : 'low';
+  var wcolors = { high: ['rgba(224,82,82,0.15)','var(--red)'], med: ['rgba(232,162,48,0.15)','var(--amber)'], low: ['rgba(76,175,126,0.15)','var(--green)'] };
+  wb.style.background = wcolors[wlevel][0];
+  wb.style.color = wcolors[wlevel][1];
+  wb.textContent = (wlevel==='high'?'สูงมาก':wlevel==='med'?'ปานกลาง':'ต่ำ') + ' (Mult ' + wLogMult.toFixed(2) + 'x)';
+
+  var parts = [];
+  if (mix.me  > 0) parts.push('ME/India ' + mix.me + '% ผ่านฮอร์มุซโดยตรง (2.5x impact)');
+  if (mix.eu  > 0) parts.push('EU/US ' + mix.eu + '% เส้นทางยาว (1.6x impact)');
+  if (mix.cn  > 0) parts.push('China ' + mix.cn + '% ผ่าน Malacca (1.0x impact)');
+  if (mix.th  > 0) parts.push('Thai supplier ' + mix.th + '% (0.1x impact)');
+  if (mix.mfg > 0) parts.push('In-house ' + mix.mfg + '% (0.05x impact)');
+  document.getElementById('src-explain').textContent = total !== 100
+    ? 'รวมสัดส่วนต้องได้ 100% (ปัจจุบัน ' + total + '%)'
+    : (parts.length ? parts.join(' | ') : 'ปรับสัดส่วนด้านบน');
+
+  recalc();
 }
 
-function updateWaterfall(base,log,raw,en,oil,recovery){
-  const labels=['Baseline','โลจิสติกส์+','วัตถุดิบ+','พลังงาน+','น้ำมัน+','ชดเชยราคา','ต้นทุนรวม'];
-  const vals=[base,log,raw,en,oil,recovery,base+log+raw+en+oil-recovery];
-  const colors=['#5b91d8','#e05252','#e05252','#e05252','#e05252','#4caf7e','#e8a230'];
-  if(wChart) wChart.destroy();
-  wChart=new Chart(document.getElementById('waterfallChart'),{
-    type:'bar',
-    data:{labels,datasets:[{data:vals.map(v=>+v.toFixed(1)),backgroundColor:colors,borderRadius:4,borderSkipped:false}]},
-    options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'฿'+c.raw}}},
-      scales:{x:{grid:{display:false},ticks:{color:'#5a6278',font:{size:11}}},
-              y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#5a6278',callback:v=>'฿'+v}}}}
+// --- RECALC ---
+function recalc() {
+  var oil   = +document.getElementById('s-oil').value;
+  var logB  = +document.getElementById('s-log').value;
+  var raw   = +document.getElementById('s-raw').value;
+  var en    = +document.getElementById('s-en').value;
+  var vol   = +document.getElementById('s-vol').value;
+  var prUp  = +document.getElementById('s-price').value;
+
+  document.getElementById('v-oil').textContent   = '+$' + oil;
+  document.getElementById('v-log').textContent   = '+฿' + logB;
+  document.getElementById('v-raw').textContent   = '+' + raw + '%';
+  document.getElementById('v-en').textContent    = '+' + en + '%';
+  document.getElementById('v-vol').textContent   = '-' + vol + '%';
+  document.getElementById('v-price').textContent = '+' + prUp + '%';
+
+  var baseCost = BL.cost  || 500;
+  var baseRev  = BL.price || 700;
+  var bmThb    = baseRev - baseCost;
+  var bmPct    = bmThb / baseRev * 100;
+
+  var logAdd  = logB * wLogMult;
+  var rawAdd  = baseCost * 0.4 * raw  / 100 * wRawMult;
+  var enAdd   = baseCost * 0.15 * en  / 100;
+  var oilAdd  = oil * 0.05;
+  var total   = logAdd + rawAdd + enAdd + oilAdd;
+  var newRev  = baseRev  * (1 + prUp  / 100);
+  var newCost = baseCost + total;
+  var newMThb = newRev - newCost;
+  var newMPct = newMThb / newRev * 100;
+  var mImpact = newMPct - bmPct;
+  var revImp  = ((1 + prUp / 100) * (1 - vol / 100) - 1) * 100;
+  var bePct   = total / baseRev * 100;
+
+  function f(v,d){ return (v>=0?'+':'')+v.toFixed(d||1); }
+  function fB(v){ return (v>=0?'+':'-')+'฿'+Math.abs(v).toFixed(1); }
+  function dt(now,base){ var p=base===0?0:(now-base)/Math.abs(base)*100; return '<span class="'+(p>0?'up-t':p<0?'dn-t':'neu-t')+'">'+(p>0?'+':'')+p.toFixed(1)+'% vs BL</span>'; }
+
+  setM('mv1', fB(total), 'md1', '<span class="up-t">+฿'+total.toFixed(1)+'</span>', total>baseCost*0.15?'red':total>baseCost*0.08?'amber':'green');
+  setM('mv2', '฿'+newCost.toFixed(1), 'md2', dt(newCost,baseCost), newCost>baseCost*1.15?'red':newCost>baseCost*1.08?'amber':'green');
+  setM('mv3', '฿'+newMThb.toFixed(1), 'md3', dt(newMThb,bmThb), newMThb<bmThb*0.7?'red':newMThb<bmThb*0.9?'amber':'green');
+  setM('mv4', newMPct.toFixed(1)+'%', 'md4', '<span class="'+(mImpact>=0?'dn-t':'up-t')+'">'+f(mImpact)+'pp vs BL</span>', mImpact<-10?'red':mImpact<-5?'amber':'green');
+  setM('mv5', f(revImp)+'%', 'md5', '<span class="'+(revImp>=0?'dn-t':'up-t')+'">รายได้รวม</span>', revImp<-5?'red':revImp<0?'amber':'green');
+  var riskTh = mImpact<-10?'วิกฤต':mImpact<-5?'สูง':mImpact<-2?'ปานกลาง':'ต่ำ';
+  setM('mv6', riskTh, 'md6', '<span class="neu-t">Break-even +'+bePct.toFixed(1)+'%</span>', mImpact<-10?'red':mImpact<-5?'amber':'green');
+
+  document.getElementById('mb1').textContent = 'Baseline: ฿0';
+  document.getElementById('mb5').textContent = 'Source Mult: ' + wLogMult.toFixed(2) + 'x';
+  document.getElementById('mb6').textContent = 'Source Mult: ' + wLogMult.toFixed(2) + 'x';
+
+  var driver = logAdd>rawAdd&&logAdd>enAdd ? 'ต้นทุนโลจิสติกส์ (weighted '+wLogMult.toFixed(2)+'x)' : rawAdd>enAdd ? 'ต้นทุนวัตถุดิบ' : 'ต้นทุนพลังงาน';
+  var rec   = prUp > 0 ? (prUp / bePct * 100).toFixed(0) : 0;
+  var adv   = revImp < -5 ? 'ปริมาณขายลดลงมาก — พิจารณาปรับราคาแบบค่อยเป็นค่อยไป'
+    : mImpact < -5 ? 'มาร์จินถูกกดดันมาก — เร่งแผนประสิทธิภาพและลด dependency จากแหล่งความเสี่ยงสูง'
+    : 'สถานการณ์จัดการได้ — พิจารณา diversify แหล่งซื้อเพื่อลด logistics multiplier';
+  document.getElementById('interp').innerHTML =
+    '<strong style="color:var(--accent2)">Baseline ฿'+baseCost+'/ลัง มาร์จิน '+bmPct.toFixed(1)+'% → ปัจจุบัน (Source Mult '+wLogMult.toFixed(2)+'x):</strong><br>' +
+    'ต้นทุนเพิ่ม <strong style="color:var(--red)">฿'+total.toFixed(1)+'</strong> ('+(total/baseCost*100).toFixed(1)+'%) จาก'+driver+'. ' +
+    'มาร์จินเปลี่ยน '+bmPct.toFixed(1)+'% เป็น <strong style="color:'+(mImpact<-5?'var(--red)':'var(--green)')+'">'+newMPct.toFixed(1)+'%</strong> ('+f(mImpact)+'pp). ' +
+    (prUp>0 ? 'ปรับราคา '+prUp+'% ชดเชยได้ ~'+rec+'%. ' : '') + adv;
+
+  updateWF(baseCost, logAdd, rawAdd, enAdd, oilAdd, Math.max(0, newRev - baseCost - total - bmThb));
+}
+
+function setM(vid, val, did, dhtml, cls) {
+  var el = document.getElementById(vid);
+  el.textContent = val;
+  el.className = 'mval' + (cls ? ' ' + cls : '');
+  var de = document.getElementById(did);
+  if (de) de.innerHTML = dhtml;
+}
+
+function updateWF(base, log, raw, en, oil, rec) {
+  var labels = ['Baseline','Logistics+','RawMat+','Energy+','Oil+','Price Rec.','New Cost'];
+  var vals   = [base, log, raw, en, oil, rec, base+log+raw+en+oil-rec].map(function(v){ return +v.toFixed(1); });
+  var colors = ['#5b91d8','#e05252','#e05252','#e05252','#e05252','#4caf7e','#e8a230'];
+  if (wfChart) wfChart.destroy();
+  wfChart = new Chart(document.getElementById('wfChart'), {
+    type: 'bar',
+    data: { labels: labels, datasets: [{ data: vals, backgroundColor: colors, borderRadius: 4, borderSkipped: false }] },
+    options: { responsive:true, maintainAspectRatio:false,
+      plugins: { legend:{display:false}, tooltip:{callbacks:{label:function(c){return 'THB '+c.raw;}}} },
+      scales: {
+        x: { grid:{display:false}, ticks:{color:'#5a6278',font:{size:11}} },
+        y: { grid:{color:'rgba(255,255,255,0.04)'}, ticks:{color:'#5a6278',callback:function(v){return '฿'+v;}} }
+      }
+    }
   });
 }
 
-// ── PILLARS ────────────────────────────────────────────
-const pillars=[
-  {id:'energy',name:'พลังงานสำรอง',color:'#e8a230',actions:[
-    {text:'ดำเนินมาตรการประหยัดพลังงานในทุกโรงงาน',sub:'ตรวจสอบฐานการใช้พลังงาน + กำหนดเป้าลดการใช้ 3 อันดับแรก'},
-    {text:'ศึกษาความเป็นไปได้และขอใบเสนอราคาโซลาร์รูฟท็อป',sub:'เป้าหมายผลิตไฟฟ้าเองได้ 20–40%'},
-    {text:'ทบทวนโครงการ EV สำหรับยานพาหนะของบริษัท',sub:'วิเคราะห์ TCO 3 ปีเมื่อน้ำมันอยู่ที่ $100+/บาร์เรล'},
-    {text:'วางแผนติดตั้งโครงสร้างพื้นฐานสถานีชาร์จ EV',sub:'ระยะที่ 1: สถานที่หลัก | ระยะที่ 2: ทั้งหมด'}
+// --- PILLARS ---
+var pillars = [
+  { id:'en', name:'พลังงานสำรอง', color:'#e8a230', acts:[
+    { t:'ดำเนินมาตรการประหยัดพลังงานในทุกโรงงาน', s:'ตรวจสอบฐานการใช้พลังงาน + เป้าลดการใช้ 3 อันดับแรก' },
+    { t:'ศึกษาความเป็นไปได้โซลาร์รูฟท็อปและขอใบเสนอราคา', s:'เป้าหมายผลิตไฟฟ้าเองได้ 20-40%' },
+    { t:'ทบทวนโครงการ EV สำหรับยานพาหนะของบริษัท', s:'วิเคราะห์ TCO 3 ปีเมื่อน้ำมัน $100+/bbl' },
+    { t:'วางแผนติดตั้งสถานีชาร์จ EV', s:'Phase 1 สถานที่หลัก Phase 2 ทั้งหมด' }
   ]},
-  {id:'supply',name:'ห่วงโซ่อุปทาน',color:'#4caf7e',actions:[
-    {text:'ทบทวนและเจรจาสัญญากับซัพพลายเออร์หลัก',sub:'เพิ่มเงื่อนไข force-majeure ล็อกราคา และแหล่งสำรอง'},
-    {text:'วิเคราะห์ความเสี่ยงซัพพลายเออร์ Tier 1 และ Tier 2',sub:'ระบุรายที่พึ่งพาเส้นทางผ่านช่องแคบฮอร์มุซ >30%'},
-    {text:'ระบุและพัฒนาซัพพลายเออร์สำรองสำหรับวัตถุดิบสำคัญ',sub:'อย่างน้อย 2 แหล่งสำรองต่อวัตถุดิบสำคัญ 1 รายการ'}
+  { id:'sc', name:'ห่วงโซ่อุปทาน', color:'#4caf7e', acts:[
+    { t:'ทบทวนและเจรจาสัญญากับซัพพลายเออร์หลัก', s:'เพิ่มเงื่อนไข force-majeure ล็อกราคา และแหล่งสำรอง' },
+    { t:'วิเคราะห์ความเสี่ยงซัพพลายเออร์ Tier 1 และ Tier 2', s:'ระบุรายที่พึ่งพาเส้นทางผ่านช่องแคบฮอร์มุซ >30%' },
+    { t:'พัฒนาซัพพลายเออร์สำรองสำหรับวัตถุดิบสำคัญ', s:'อย่างน้อย 2 แหล่งสำรองต่อวัตถุดิบสำคัญ 1 รายการ' }
   ]},
-  {id:'inventory',name:'สต็อกสินค้าเชิงกลยุทธ์',color:'#5b91d8',actions:[
-    {text:'เพิ่มสต็อกวัตถุดิบให้ได้ 3–6 เดือน',sub:'ให้ความสำคัญกับวัตถุดิบ lead time นาน หรือมีแหล่งเดียว'},
-    {text:'เพิ่มสต็อกสินค้าสำเร็จรูปสำหรับ SKU หลัก',sub:'สอดคล้องกับอัตราการขายและความสามารถในการจัดเก็บ'},
-    {text:'กำหนดและตั้งระบบแจ้งเตือน Reorder อัตโนมัติ',sub:'เชื่อมต่อกับระบบ ERP หรือ Planning System'}
+  { id:'inv', name:'สต็อกสินค้า', color:'#5b91d8', acts:[
+    { t:'เพิ่มสต็อกวัตถุดิบให้ได้ 3-6 เดือน', s:'ให้ความสำคัญกับวัตถุดิบ lead time นานหรือมีแหล่งเดียว' },
+    { t:'เพิ่มสต็อกสินค้าสำเร็จรูปสำหรับ SKU หลัก', s:'สอดคล้องกับอัตราการขายและความสามารถจัดเก็บ' },
+    { t:'กำหนดและตั้งระบบแจ้งเตือน Reorder อัตโนมัติ', s:'เชื่อมต่อกับระบบ ERP หรือ Planning System' }
   ]},
-  {id:'efficiency',name:'ประสิทธิภาพ & AI',color:'#9b79e8',actions:[
-    {text:'จัดทำ Roadmap โรงงานอัจฉริยะ',sub:'มุ่งเน้นการเพิ่ม Yield ลดของเสีย และลด Downtime'},
-    {text:'นำร่อง AI เพิ่มประสิทธิภาพการผลิต',sub:'เลือก 1–2 สายการผลิตเพื่อทดสอบ Proof of Concept'},
-    {text:'วางแผนสำนักงานอัจฉริยะ (Smart Office)',sub:'เพิ่มประสิทธิภาพพลังงาน การจัดตารางเวลา และ Workflow'}
+  { id:'ai', name:'ประสิทธิภาพ & AI', color:'#9b79e8', acts:[
+    { t:'จัดทำ Roadmap โรงงานอัจฉริยะ', s:'มุ่งเน้น Yield ลดของเสีย และลด Downtime' },
+    { t:'นำร่อง AI เพิ่มประสิทธิภาพการผลิต', s:'เลือก 1-2 สายการผลิตทดสอบ Proof of Concept' },
+    { t:'วางแผน Smart Office', s:'เพิ่มประสิทธิภาพพลังงาน การจัดตาราง และ Workflow' }
   ]},
-  {id:'pricing',name:'กลยุทธ์ราคา & มาร์จิน',color:'#e05252',actions:[
-    {text:'จัดตั้ง Dashboard ติดตามต้นทุนรายสัปดาห์',sub:'ติดตามดัชนีโลจิสติกส์ พลังงาน และวัตถุดิบแบบ Real-time'},
-    {text:'วิเคราะห์ความยืดหยุ่นของราคา แต่ละ SKU',sub:'ระบุเพดานการปรับราคาก่อนสูญเสียส่วนแบ่งตลาด'},
-    {text:'จัดทำ Playbook ป้องกันมาร์จินสำหรับ 3 สถานการณ์',sub:'กำหนด Response Tier ล่วงหน้า: เบา / กลาง / รุนแรง'}
+  { id:'pr', name:'กลยุทธ์ราคา', color:'#e05252', acts:[
+    { t:'Dashboard ติดตามต้นทุนรายสัปดาห์', s:'ติดตาม Logistics/Energy/RawMat Index แบบ Real-time' },
+    { t:'วิเคราะห์ Price Elasticity แต่ละ SKU', s:'ระบุเพดานการปรับราคาก่อนสูญเสียส่วนแบ่งตลาด' },
+    { t:'จัดทำ Margin Protection Playbook 3 สถานการณ์', s:'Response Tier: เบา / กลาง / รุนแรง' }
   ]}
 ];
 
-const checklistData=[
-  {section:'บุคลากรและความเป็นผู้นำ',items:[
-    {text:'สื่อสารสถานการณ์ความเสี่ยงอย่างชัดเจนต่อบุคลากรหลักทุกคน',sub:'จัดประชุม All-Directors Briefing เรื่องความเสี่ยงและผลกระทบต่ออาเซียน'},
-    {text:'กำหนดทีมตอบสนองวิกฤตพร้อมระบุผู้รับผิดชอบแต่ละเสาหลัก',sub:'มอบหมาย Owner: พลังงาน / ห่วงโซ่อุปทาน / สต็อก / ประสิทธิภาพ / ราคา'},
-    {text:'เตรียมความพร้อมทั้งร่างกายและจิตใจของทีม',sub:'การรับมือวิกฤตระยะยาวต้องอาศัยทั้งความพร้อมทางกายและจิตใจ'},
-    {text:'กำหนดตารางฝึกซ้อม War Game รายเดือน',sub:'ใช้เครื่องมือนี้ในการฝึกซ้อมร่วมกับผู้บริหารทุกท่าน'}
-  ]},
-  {section:'พลังงานสำรอง',items:pillars[0].actions.map(a=>({text:a.text,sub:a.sub}))},
-  {section:'ห่วงโซ่อุปทานและสต็อกสินค้า',items:[...pillars[1].actions,...pillars[2].actions].map(a=>({text:a.text,sub:a.sub}))},
-  {section:'ประสิทธิภาพและกลยุทธ์ราคา',items:[...pillars[3].actions,...pillars[4].actions].map(a=>({text:a.text,sub:a.sub}))}
-];
-
-function buildPillars(){
-  const ps=document.getElementById('pillar-summary'),rs=document.getElementById('readiness-section');
-  ps.innerHTML='';rs.innerHTML='';
-  pillars.forEach(p=>{
-    p.actions.forEach((a,i)=>{readinessState[p.id+'_'+i]=50});
-    const pc=document.createElement('div');pc.className='pillar-card';pc.style.borderTopColor=p.color;
-    pc.innerHTML=`<div class="pillar-name">${p.name}</div><div class="pillar-pct" id="pp_${p.id}" style="color:${p.color}">50%</div><div class="pbar"><div class="pbar-fill" id="pb_${p.id}" style="width:50%;background:${p.color}"></div></div>`;
-    ps.appendChild(pc);
-    const card=document.createElement('div');card.className='card';
-    card.innerHTML=`<div class="card-title" style="color:${p.color}">${p.name} — ประเมินความพร้อม</div>`;
-    p.actions.forEach((a,i)=>{
-      const key=p.id+'_'+i;
-      const row=document.createElement('div');row.className='r-row';
-      row.innerHTML=`<div class="r-label"><strong style="color:var(--text)">${a.text}</strong><br><span style="color:var(--text3);font-size:12px">${a.sub}</span></div><input type="range" class="r-slider" min="0" max="100" step="10" value="50" oninput="updateReadiness('${key}','${p.color}',this.value)"><span class="r-pct" id="rv_${key}">50%</span>`;
+function buildPillars() {
+  var pg = document.getElementById('pgrid');
+  var rs = document.getElementById('rsection');
+  pg.innerHTML = ''; rs.innerHTML = '';
+  pillars.forEach(function(p) {
+    p.acts.forEach(function(a, i){ rState[p.id+'_'+i] = 50; });
+    var pc = document.createElement('div'); pc.className = 'pcard'; pc.style.borderTopColor = p.color;
+    pc.innerHTML = '<div class="pname">'+p.name+'</div><div class="ppct" id="pp_'+p.id+'" style="color:'+p.color+'">50%</div><div class="pbar"><div class="pbar-fill" id="pb_'+p.id+'" style="width:50%;background:'+p.color+'"></div></div>';
+    pg.appendChild(pc);
+    var card = document.createElement('div'); card.className = 'card';
+    card.innerHTML = '<div class="card-title" style="color:'+p.color+'">'+p.name+' — ประเมินความพร้อม</div>';
+    p.acts.forEach(function(a, i) {
+      var key = p.id+'_'+i;
+      var row = document.createElement('div'); row.className = 'rrow';
+      row.innerHTML = '<div class="rlabel"><strong style="color:var(--text)">'+a.t+'</strong><br><span style="color:var(--text3);font-size:12px">'+a.s+'</span></div>' +
+        '<input type="range" class="rslider" min="0" max="100" step="10" value="50" oninput="updR(\''+key+'\',\''+p.color+'\',this.value)">' +
+        '<span class="rpct" id="rv_'+key+'">50%</span>';
       card.appendChild(row);
     });
     rs.appendChild(card);
   });
-  updateOverall();
+  updOv();
 }
-
-function updateReadiness(key,color,val){readinessState[key]=+val;document.getElementById('rv_'+key).textContent=val+'%';updateOverall()}
-function updateOverall(){
-  pillars.forEach(p=>{
-    const keys=p.actions.map((_,i)=>p.id+'_'+i);
-    const avg=Math.round(keys.reduce((s,k)=>s+readinessState[k],0)/keys.length);
-    const pp=document.getElementById('pp_'+p.id),pb=document.getElementById('pb_'+p.id);
-    if(pp)pp.textContent=avg+'%';if(pb)pb.style.width=avg+'%';
+function updR(key, color, val) {
+  rState[key] = +val;
+  document.getElementById('rv_'+key).textContent = val + '%';
+  updOv();
+}
+function updOv() {
+  pillars.forEach(function(p) {
+    var keys = p.acts.map(function(_,i){ return p.id+'_'+i; });
+    var avg = Math.round(keys.reduce(function(s,k){ return s+rState[k]; }, 0) / keys.length);
+    var pp = document.getElementById('pp_'+p.id); var pb = document.getElementById('pb_'+p.id);
+    if (pp) pp.textContent = avg+'%'; if (pb) pb.style.width = avg+'%';
   });
-  const all=Object.values(readinessState);
-  const overall=Math.round(all.reduce((s,v)=>s+v,0)/all.length);
-  document.getElementById('overall-score').textContent=overall+'%';
-  document.getElementById('overall-label').textContent=overall<30?'มีช่องว่างวิกฤต — ต้องดำเนินการทันที':overall<60?'ความพร้อมระดับกลาง — เร่งพัฒนาเสาหลักที่อ่อนแอ':overall<80?'คืบหน้าดี — รักษาโมเมนตัมต่อไป':'พร้อมรับมือสูง — ดำเนินการฝึกซ้อม War Game รอบสุดท้าย';
-  const bar=document.getElementById('overall-bar');
-  bar.style.width=overall+'%';bar.style.background=overall<30?'#e05252':overall<60?'#e8a230':'#4caf7e';
+  var all = Object.values(rState);
+  var ov = Math.round(all.reduce(function(s,v){ return s+v; }, 0) / all.length);
+  document.getElementById('ov-score').textContent = ov + '%';
+  document.getElementById('ov-label').textContent = ov<30?'วิกฤต — ต้องดำเนินการทันที':ov<60?'ปานกลาง — เร่งพัฒนาเสาหลักที่อ่อนแอ':ov<80?'ดี — รักษาโมเมนตัม':'พร้อมสูง — ฝึกซ้อม War Game รอบสุดท้าย';
+  var bar = document.getElementById('ov-bar');
+  bar.style.width = ov+'%'; bar.style.background = ov<30?'#e05252':ov<60?'#e8a230':'#4caf7e';
 }
 
-const scenarioDefs=[
-  {id:'mild',label:'ระดับเบา (+฿10/ลัง)',cls:'mild',logistics:10,oil:15,raw:6,en:10,vol:3,price:4},
-  {id:'moderate',label:'ระดับกลาง (+฿20/ลัง)',cls:'moderate',logistics:20,oil:30,raw:12,en:20,vol:8,price:7},
-  {id:'severe',label:'ระดับรุนแรง (+฿30/ลัง)',cls:'severe',logistics:30,oil:60,raw:22,en:35,vol:15,price:12}
+// --- SCENARIO COMPARE ---
+var scDefs = [
+  { id:'mild',     label:'ระดับเบา (+฿10/ลัง)',    cls:'mild',     log:10, oil:15, raw:6,  en:10, vol:3,  price:4  },
+  { id:'moderate', label:'ระดับกลาง (+฿20/ลัง)',   cls:'moderate', log:20, oil:30, raw:12, en:20, vol:8,  price:7  },
+  { id:'severe',   label:'ระดับรุนแรง (+฿30/ลัง)', cls:'severe',   log:30, oil:60, raw:22, en:35, vol:15, price:12 }
 ];
+function buildScCards() {
+  var g = document.getElementById('scgrid'); g.innerHTML = '';
+  var bc = BL.cost||500, br = BL.price||700;
+  scDefs.forEach(function(s) {
+    var ca  = s.log * wLogMult + bc*0.4*s.raw/100*wRawMult + bc*0.15*s.en/100 + s.oil*0.05;
+    var nr  = br * (1 + s.price/100);
+    var nm  = ((nr - bc - ca) / nr * 100).toFixed(1);
+    var ri  = ((1+s.price/100)*(1-s.vol/100)-1)*100;
+    var c   = document.createElement('div'); c.className = 'sccard';
+    c.innerHTML = '<div class="schead '+s.cls+'">'+s.label+'</div><div class="scbody">' +
+      scr('ต้นทุนเพิ่ม/ลัง', '+฿'+ca.toFixed(1)) +
+      scr('มาร์จิน (ใหม่)', nm+'%') +
+      scr('ผลกระทบรายได้', ri.toFixed(1)+'%') +
+      scr('Source Mult', wLogMult.toFixed(2)+'x') +
+      scr('ปริมาณลดลง', '-'+s.vol+'%') +
+      scr('น้ำมัน+', '+$'+s.oil+'/bbl') +
+      '</div>';
+    g.appendChild(c);
+  });
+}
+function scr(k,v){ return '<div class="scrow"><span class="k">'+k+'</span><span class="v">'+v+'</span></div>'; }
 
-function buildScenarioCards(){
-  const grid=document.getElementById('sc-grid');grid.innerHTML='';
-  const baseCost=baselineData.cost||160,baseRev=baselineData.price||200;
-  scenarioDefs.forEach(s=>{
-    const costAdd=s.logistics+baseCost*0.4*s.raw/100+baseCost*0.15*s.en/100+s.oil*0.05;
-    const newRev=baseRev*(1+s.price/100);
-    const newMargin=((newRev-baseCost-costAdd)/newRev*100);
-    const revImpact=((1+s.price/100)*(1-s.vol/100)-1)*100;
-    const card=document.createElement('div');card.className='sc-card';
-    card.innerHTML=`<div class="sc-header ${s.cls}">${s.label}</div><div class="sc-body"><div class="sc-row"><span class="k">ต้นทุนเพิ่ม/ลัง</span><span class="v">+฿${costAdd.toFixed(1)}</span></div><div class="sc-row"><span class="k">มาร์จิน (ใหม่)</span><span class="v">${newMargin.toFixed(1)}%</span></div><div class="sc-row"><span class="k">ผลกระทบรายได้</span><span class="v">${revImpact.toFixed(1)}%</span></div><div class="sc-row"><span class="k">โลจิสติกส์+/ลัง</span><span class="v">+฿${s.logistics}</span></div><div class="sc-row"><span class="k">ปริมาณขายลดลง</span><span class="v">-${s.vol}%</span></div><div class="sc-row"><span class="k">ราคาน้ำมัน+</span><span class="v">+$${s.oil}/bbl</span></div></div>`;
-    grid.appendChild(card);
+function buildScChart() {
+  if (scChart) scChart.destroy();
+  var bc = BL.cost||500, br = BL.price||700;
+  function calcM(s){ var ca=s.log*wLogMult+bc*0.4*s.raw/100*wRawMult+bc*0.15*s.en/100+s.oil*0.05; return +((br*(1+s.price/100)-bc-ca)/(br*(1+s.price/100))*100).toFixed(1); }
+  function calcR(s){ return +((1+s.price/100)*(1-s.vol/100)-1)*100; }
+  function calcC(s){ return +(s.log*wLogMult+bc*0.4*s.raw/100*wRawMult+bc*0.15*s.en/100+s.oil*0.05).toFixed(1)/10; }
+  scChart = new Chart(document.getElementById('scChart'), {
+    type: 'bar',
+    data: { labels:['มาร์จินสุทธิ(%)','ผลกระทบรายได้(%)','ต้นทุน+/ลัง(÷10)'],
+      datasets:[
+        {label:'ระดับเบา',     data:[calcM(scDefs[0]),calcR(scDefs[0]).toFixed(1),calcC(scDefs[0])], backgroundColor:'#4caf7e'},
+        {label:'ระดับกลาง',    data:[calcM(scDefs[1]),calcR(scDefs[1]).toFixed(1),calcC(scDefs[1])], backgroundColor:'#e8a230'},
+        {label:'ระดับรุนแรง',  data:[calcM(scDefs[2]),calcR(scDefs[2]).toFixed(1),calcC(scDefs[2])], backgroundColor:'#e05252'}
+      ]},
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
+      scales:{ x:{grid:{display:false},ticks:{color:'#5a6278'}}, y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#5a6278'}} }}
   });
 }
 
-function buildScenarioChart(){
-  if(sChart)sChart.destroy();
-  sChart=new Chart(document.getElementById('scenarioChart'),{
-    type:'bar',
-    data:{labels:['มาร์จินสุทธิ (%)','ผลกระทบรายได้ (%)','ต้นทุน+/ลัง (÷10)'],
-      datasets:[{label:'ระดับเบา',data:[19.2,0.9,1.4],backgroundColor:'#4caf7e'},{label:'ระดับกลาง',data:[13.8,-1.2,3.7],backgroundColor:'#e8a230'},{label:'ระดับรุนแรง',data:[7.1,-4.7,6.8],backgroundColor:'#e05252'}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{color:'#5a6278'}},y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#5a6278'}}}}
-  });
-}
-
-let checkTotal=0,checkDone=0;
-function buildChecklist(){
-  const container=document.getElementById('checklist-container');container.innerHTML='';checkTotal=0;
-  checklistData.forEach((section,si)=>{
-    const card=document.createElement('div');card.className='card';
-    card.innerHTML=`<div class="card-title">${section.section}</div>`;
-    section.items.forEach((item,ii)=>{
-      const key=`s${si}_i${ii}`;checkState[key]=false;checkTotal++;
-      const row=document.createElement('div');row.className='checklist-item';row.dataset.key=key;
-      row.innerHTML=`<div class="check-box" id="cb_${key}"></div><div><div class="check-text">${item.text}</div><div class="check-sub">${item.sub}</div></div>`;
-      row.onclick=()=>toggleCheck(key,row);card.appendChild(row);
+// --- CHECKLIST ---
+var clData = [
+  { sec:'บุคลากรและความเป็นผู้นำ', items:[
+    { t:'สื่อสารสถานการณ์ความเสี่ยงต่อบุคลากรหลักทุกคน', s:'จัดประชุม All-Directors Briefing เรื่องความเสี่ยง ASEAN' },
+    { t:'กำหนดทีมวิกฤตและ Owner แต่ละเสาหลัก', s:'พลังงาน / ห่วงโซ่อุปทาน / สต็อก / AI / ราคา' },
+    { t:'เตรียมความพร้อมร่างกายและจิตใจของทีม', s:'วิกฤตระยะยาวต้องพร้อมทั้งกายและใจ' },
+    { t:'กำหนดตาราง War Game รายเดือน', s:'ใช้เครื่องมือนี้ฝึกซ้อมกับผู้บริหาร' }
+  ]},
+  { sec:'Supply Source — ลดความเสี่ยง', items:[
+    { t:'ประเมินและลด dependency จากแหล่ง High Impact (ME/India)', s:'พิจารณา diversify ไปยัง China/Thai supplier' },
+    { t:'เพิ่มสัดส่วนการผลิตในประเทศเพื่อลด logistics multiplier', s:'In-house manufacturing = lowest impact (0.05x)' },
+    { t:'หาซัพพลายเออร์สำรองสำหรับแต่ละ Source', s:'อย่างน้อย 2 แหล่งสำรองต่อวัตถุดิบสำคัญ' },
+    { t:'เจรจา War Risk Coverage กับ Freight Forwarder', s:'ล็อกราคาระยะยาวก่อนสถานการณ์แย่ลง' }
+  ]},
+  { sec:'พลังงานและห่วงโซ่อุปทาน', items:[
+    { t:'ดำเนินมาตรการประหยัดพลังงาน', s:'ตรวจสอบฐาน + เป้าลด 3 อันดับแรก' },
+    { t:'โซลาร์รูฟท็อปและ EV', s:'ลด dependency จากน้ำมันระยะยาว' },
+    { t:'เพิ่มสต็อกวัตถุดิบ 3-6 เดือน', s:'วัตถุดิบ lead time นาน / แหล่งเดียว' },
+    { t:'Dashboard ติดตามต้นทุนรายสัปดาห์', s:'Logistics/Energy/RawMat Index Real-time' }
+  ]}
+];
+var clTotal = 0;
+function buildCL() {
+  var con = document.getElementById('cl-container'); con.innerHTML = ''; clTotal = 0;
+  clData.forEach(function(sec, si) {
+    var card = document.createElement('div'); card.className = 'card';
+    card.innerHTML = '<div class="card-title">'+sec.sec+'</div>';
+    sec.items.forEach(function(item, ii) {
+      var key = 's'+si+'i'+ii; ckState[key] = false; clTotal++;
+      var row = document.createElement('div'); row.className = 'clitem'; row.dataset.key = key;
+      row.innerHTML = '<div class="clbox" id="cb_'+key+'"></div><div><div class="cltxt">'+item.t+'</div><div class="clsub">'+item.s+'</div></div>';
+      row.onclick = function(){ togCL(key, row); };
+      card.appendChild(row);
     });
-    container.appendChild(card);
-  });updateCheckProgress();
-}
-function toggleCheck(key,row){
-  checkState[key]=!checkState[key];
-  const cb=document.getElementById('cb_'+key);
-  cb.classList.toggle('checked',checkState[key]);cb.textContent=checkState[key]?'✓':'';
-  row.classList.toggle('checked',checkState[key]);updateCheckProgress();
-}
-function updateCheckProgress(){
-  checkDone=Object.values(checkState).filter(Boolean).length;
-  document.getElementById('check-progress').textContent=`${checkDone} / ${checkTotal} รายการ`;
-  document.getElementById('check-bar').style.width=(checkTotal?(checkDone/checkTotal*100):0)+'%';
-}
-// ══════════════════════════════════════════════════
-// SUPPLY ORIGIN ENGINE
-// ══════════════════════════════════════════════════
-
-// Origin definitions — logistics multiplier vs "no-war baseline"
-// multiplier = how much MORE the logistics cost increases vs average
-// due to war/Hormuz closure, route dependency, surcharges
-const ORIGINS = {
-  'china-shanghai': {
-    label: 'จีน — เซี่ยงไฮ้ (Shanghai)',
-    flag: '🇨🇳',
-    route: 'Pacific / South China Sea',
-    logisticsMult: 1.0,   // minimal Hormuz exposure
-    rawmatMult: 0.7,      // China supply intact
-    energyMult: 0.8,
-    riskLevel: 'ต่ำ',
-    riskColor: 'var(--green)',
-    riskBg: 'rgba(76,175,126,0.15)',
-    borderColor: '#4caf7e',
-    routeNote: 'เส้นทาง Pacific ไม่ผ่านฮอร์มุซ กระทบน้อย',
-    surcharge: 'ค่าขนส่งเพิ่มปานกลาง ~฿8-12/ลัง'
-  },
-  'china-guangzhou': {
-    label: 'จีน — กวางโจว (Guangzhou)',
-    flag: '🇨🇳',
-    route: 'South China Sea / Malacca',
-    logisticsMult: 1.0,
-    rawmatMult: 0.7,
-    energyMult: 0.8,
-    riskLevel: 'ต่ำ',
-    riskColor: 'var(--green)',
-    riskBg: 'rgba(76,175,126,0.15)',
-    borderColor: '#4caf7e',
-    routeNote: 'เส้นทาง South China Sea ไม่ผ่านฮอร์มุซ',
-    surcharge: 'ค่าขนส่งเพิ่ม ~฿8-12/ลัง'
-  },
-  'china-tianjin': {
-    label: 'จีน — เทียนจิน (Tianjin)',
-    flag: '🇨🇳',
-    route: 'Pacific / Yellow Sea',
-    logisticsMult: 0.9,
-    rawmatMult: 0.7,
-    energyMult: 0.8,
-    riskLevel: 'ต่ำ',
-    riskColor: 'var(--green)',
-    riskBg: 'rgba(76,175,126,0.15)',
-    borderColor: '#4caf7e',
-    routeNote: 'เส้นทาง Pacific ไม่ผ่านฮอร์มุซ กระทบน้อยที่สุด',
-    surcharge: 'ค่าขนส่งเพิ่ม ~฿6-10/ลัง'
-  },
-  'middle-east': {
-    label: 'ตะวันออกกลาง / อ่าวเปอร์เซีย',
-    flag: '⚠️',
-    route: 'Strait of Hormuz (CLOSED)',
-    logisticsMult: 3.5,   // Hormuz closed, massive surcharge
-    rawmatMult: 2.5,
-    energyMult: 3.0,
-    riskLevel: 'วิกฤต',
-    riskColor: 'var(--red)',
-    riskBg: 'rgba(224,82,82,0.15)',
-    borderColor: '#e05252',
-    routeNote: 'ช่องแคบฮอร์มุซปิด — ต้องอ้อม Cape of Good Hope +14 วัน',
-    surcharge: 'War Risk Surcharge $1,500/TEU + Emergency Bunker $200/TEU'
-  },
-  'india': {
-    label: 'อินเดีย — มุมไบ / เจนไน',
-    flag: '🇮🇳',
-    route: 'Indian Ocean / Malacca',
-    logisticsMult: 1.8,
-    rawmatMult: 1.2,
-    energyMult: 1.5,
-    riskLevel: 'ปานกลาง',
-    riskColor: 'var(--amber)',
-    riskBg: 'rgba(232,162,48,0.15)',
-    borderColor: '#e8a230',
-    routeNote: 'ใกล้โซนสงคราม แต่ไม่ผ่านฮอร์มุซโดยตรง',
-    surcharge: 'War Risk Premium เพิ่ม ~$300/TEU'
-  },
-  'europe': {
-    label: 'ยุโรป — Rotterdam / Hamburg',
-    flag: '🇪🇺',
-    route: 'Suez Canal / Indian Ocean',
-    logisticsMult: 2.2,
-    rawmatMult: 1.4,
-    energyMult: 2.0,
-    riskLevel: 'สูง',
-    riskColor: 'var(--red)',
-    riskBg: 'rgba(224,82,82,0.12)',
-    borderColor: '#e05252',
-    routeNote: 'เส้นทาง Suez ผ่านทะเลแดง — กระทบจากสงคราม',
-    surcharge: 'Suez surcharge + ค่าน้ำมันเรือสูงขึ้น ~$400/TEU'
-  },
-  'domestic': {
-    label: 'ผลิตในประเทศ (ไทย)',
-    flag: '🇹🇭',
-    route: 'ไม่มีการขนส่งระหว่างประเทศ',
-    logisticsMult: 0.2,   // only domestic transport affected
-    rawmatMult: 1.1,      // some imported raw materials still affected
-    energyMult: 1.3,      // domestic energy cost still rises
-    riskLevel: 'ต่ำ',
-    riskColor: 'var(--green)',
-    riskBg: 'rgba(76,175,126,0.15)',
-    borderColor: '#4caf7e',
-    routeNote: 'ไม่ผ่านเส้นทางทะเลระหว่างประเทศ กระทบน้อยที่สุด',
-    surcharge: 'กระทบเฉพาะต้นทุนพลังงานและวัตถุดิบนำเข้า'
-  },
-  'asean': {
-    label: 'อาเซียน — เวียดนาม / มาเลเซีย',
-    flag: '🌏',
-    route: 'South China Sea / Malacca',
-    logisticsMult: 0.8,
-    rawmatMult: 0.9,
-    energyMult: 1.1,
-    riskLevel: 'ต่ำ-ปานกลาง',
-    riskColor: 'var(--green)',
-    riskBg: 'rgba(76,175,126,0.12)',
-    borderColor: '#4caf7e',
-    routeNote: 'เส้นทางระยะสั้น ไม่ผ่านฮอร์มุซ',
-    surcharge: 'ค่าขนส่งเพิ่มน้อย ~฿5-8/ลัง'
-  },
-  'usa': {
-    label: 'สหรัฐฯ — Los Angeles / Houston',
-    flag: '🇺🇸',
-    route: 'Pacific Ocean',
-    logisticsMult: 1.1,
-    rawmatMult: 1.0,
-    energyMult: 0.9,
-    riskLevel: 'ต่ำ',
-    riskColor: 'var(--green)',
-    riskBg: 'rgba(76,175,126,0.15)',
-    borderColor: '#4caf7e',
-    routeNote: 'เส้นทาง Pacific ไม่ผ่านฮอร์มุซ',
-    surcharge: 'ค่าขนส่งเพิ่มเล็กน้อย ~฿8-12/ลัง'
-  }
-};
-
-let skuRows = [];
-let skuIdCounter = 0;
-let weightedLogisticsResult = null;
-
-function addSKU(name='', originKey='china-shanghai', pct=0, costPerCase=0) {
-  const id = 'sku_' + (++skuIdCounter);
-  skuRows.push({ id, name, originKey, pct, costPerCase });
-  renderSKUList();
-}
-
-function removeSKU(id) {
-  skuRows = skuRows.filter(r => r.id !== id);
-  renderSKUList();
-}
-
-function renderSKUList() {
-  const list = document.getElementById('sku-list');
-  list.innerHTML = '';
-
-  skuRows.forEach((row, idx) => {
-    const div = document.createElement('div');
-    div.className = 'sku-row';
-    const opts = Object.entries(ORIGINS).map(([k, v]) =>
-      '<option value="' + k + '"' + (k === row.originKey ? ' selected' : '') + '>' + v.flag + ' ' + v.label + '</option>'
-    ).join('');
-
-    div.innerHTML =
-      '<input class="sku-name-input" type="text" placeholder="เช่น สินค้า FMCG กลุ่ม A" value="' + (row.name||'') + '" oninput="skuRows['+idx+'].name=this.value">' +
-      '<select class="origin-select" onchange="skuRows['+idx+'].originKey=this.value;renderSKUList()">' + opts + '</select>' +
-      '<input class="pct-input" type="number" min="0" max="100" step="5" placeholder="%" value="' + (row.pct||'') + '" oninput="skuRows['+idx+'].pct=+this.value;updatePctTotal()">' +
-      '<input class="pct-input" type="number" min="0" step="1" placeholder="฿" value="' + (row.costPerCase||'') + '" oninput="skuRows['+idx+'].costPerCase=+this.value">' +
-      '<button class="sku-delete" onclick="removeSKU(\'' + row.id + '\')" title="ลบ">✕</button>';
-    list.appendChild(div);
+    con.appendChild(card);
   });
-
-  updatePctTotal();
+  updCL();
+}
+function togCL(key, row) {
+  ckState[key] = !ckState[key];
+  var cb = document.getElementById('cb_'+key);
+  cb.classList.toggle('on', ckState[key]);
+  cb.textContent = ckState[key] ? '✓' : '';
+  row.classList.toggle('on', ckState[key]);
+  updCL();
+}
+function updCL() {
+  var done = Object.values(ckState).filter(Boolean).length;
+  document.getElementById('cl-prog').textContent = done + ' / ' + clTotal + ' รายการ';
+  document.getElementById('cl-bar').style.width = (clTotal ? done/clTotal*100 : 0) + '%';
 }
 
-function updatePctTotal() {
-  const total = skuRows.reduce((s, r) => s + (+r.pct || 0), 0);
-  const bar = document.getElementById('pct-total-bar');
-  const txt = document.getElementById('pct-total-text');
-  const val = document.getElementById('pct-total-val');
-  val.textContent = total + '%';
-  if (total === 100) {
-    bar.className = 'pct-total-bar';
-    txt.innerHTML = '<span class="pct-total-ok">✅ ครบ 100% — พร้อมคำนวณ</span>';
-    val.className = 'pct-total-ok';
-  } else if (total > 100) {
-    txt.innerHTML = '<span class="pct-total-err">⚠️ เกิน 100% — กรุณาปรับสัดส่วน</span>';
-    val.className = 'pct-total-err';
-  } else {
-    txt.innerHTML = '<span class="pct-total-warn">รวม ' + total + '% — ยังขาดอยู่ ' + (100 - total) + '%</span>';
-    val.className = 'pct-total-warn';
-  }
-}
-
-function calcOriginImpact() {
-  const total = skuRows.reduce((s, r) => s + (+r.pct || 0), 0);
-  if (total !== 100) {
-    alert('กรุณาให้สัดส่วนรวมเป็น 100% ก่อนคำนวณ (ตอนนี้ = ' + total + '%)');
-    return;
-  }
-  if (skuRows.length === 0) {
-    alert('กรุณาเพิ่มกลุ่มสินค้าอย่างน้อย 1 รายการ');
-    return;
-  }
-
-  // Get current slider values as base shock
-  const oilShock    = +document.getElementById('s-oil').value;
-  const rawShock    = +document.getElementById('s-rawmat').value;
-  const energyShock = +document.getElementById('s-energy').value;
-  const baseLogistics = +document.getElementById('s-logistics').value;
-
-  // Calculate per-origin impact
-  const results = skuRows.map(row => {
-    const o = ORIGINS[row.originKey];
-    const pct = +row.pct / 100;
-    const baseCostCase = +row.costPerCase || (baselineData.cost || 160);
-
-    // Adjust each cost component by origin multiplier
-    const logAdd   = baseLogistics * o.logisticsMult;
-    const rawAdd   = baseCostCase * 0.4 * rawShock / 100 * o.rawmatMult;
-    const enAdd    = baseCostCase * 0.15 * energyShock / 100 * o.energyMult;
-    const oilAdd   = oilShock * 0.05 * o.logisticsMult;
-    const totalAdd = logAdd + rawAdd + enAdd + oilAdd;
-
-    return {
-      ...row,
-      origin: o,
-      logAdd: +logAdd.toFixed(1),
-      rawAdd: +rawAdd.toFixed(1),
-      enAdd:  +enAdd.toFixed(1),
-      oilAdd: +oilAdd.toFixed(1),
-      totalAdd: +totalAdd.toFixed(1),
-      weightedAdd: +(totalAdd * pct).toFixed(2)
-    };
-  });
-
-  // Weighted average
-  const weightedTotal = results.reduce((s, r) => s + r.weightedAdd, 0);
-  weightedLogisticsResult = +weightedTotal.toFixed(1);
-
-  // Render breakdown cards
-  const breakdown = document.getElementById('origin-breakdown');
-  breakdown.innerHTML = results.map(r => {
-    const impactCls = r.totalAdd > 35 ? 'red' : r.totalAdd > 20 ? 'amber' : 'green';
-    return '<div class="origin-item" style="border-left-color:' + r.origin.borderColor + '">' +
-      '<div class="origin-item-name">' + r.origin.flag + ' ' + (r.name || r.origin.label) + '</div>' +
-      '<div class="origin-item-pct">สัดส่วน ' + r.pct + '% | ต้นทุน ฿' + (r.costPerCase||baselineData.cost) + '/ลัง</div>' +
-      '<div class="origin-item-route">📍 ' + r.origin.routeNote + '</div>' +
-      '<div class="origin-item-route" style="color:var(--text3)">💸 ' + r.origin.surcharge + '</div>' +
-      '<div class="origin-item-impact ' + impactCls + '">+฿' + r.totalAdd + '/ลัง</div>' +
-      '<div style="font-size:11px;color:var(--text3)">Logistics +฿' + r.logAdd + ' | วัตถุดิบ +฿' + r.rawAdd + ' | พลังงาน +฿' + r.enAdd + '</div>' +
-      '<div class="origin-risk-tag" style="background:' + r.origin.riskBg + ';color:' + r.origin.riskColor + '">ความเสี่ยง: ' + r.origin.riskLevel + '</div>' +
-    '</div>';
-  }).join('');
-
-  // Weighted result display
-  const currentSliderLogistics = +document.getElementById('s-logistics').value;
-  const diff = +(weightedLogisticsResult - currentSliderLogistics).toFixed(1);
-  const diffTxt = diff > 0 ? '<span style="color:var(--red)">+฿' + diff + ' สูงกว่า Slider</span>'
-    : diff < 0 ? '<span style="color:var(--green)">฿' + diff + ' ต่ำกว่า Slider</span>'
-    : '<span style="color:var(--green)">ตรงกับ Slider</span>';
-
-  document.getElementById('origin-weighted-val').textContent = '+฿' + weightedLogisticsResult + '/ลัง';
-  document.getElementById('origin-weighted-sub').textContent =
-    'ถ่วงน้ำหนักจาก ' + results.length + ' แหล่ง | ' +
-    results.map(r => r.origin.flag + ' ' + r.pct + '%').join(', ');
-  document.getElementById('origin-vs-slider').innerHTML = diffTxt;
-  document.getElementById('origin-impact').classList.add('visible');
-
-  // Scroll to result
-  document.getElementById('origin-impact').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-}
-
-function applyOriginToSlider() {
-  if (weightedLogisticsResult === null) return;
-  document.getElementById('s-logistics').value = Math.min(60, weightedLogisticsResult);
-  recalc();
-  // Switch to simulator tab
-  switchTab('scenario', document.querySelector('.nav-btn'));
-  document.querySelectorAll('.nav-btn')[0].classList.add('active');
-  document.getElementById('tab-scenario').classList.add('active');
-
-  // Flash the slider to highlight change
-  const slider = document.getElementById('s-logistics');
-  slider.style.transition = 'all 0.3s';
-  slider.style.accentColor = 'var(--green)';
-  setTimeout(() => { slider.style.accentColor = ''; }, 2000);
-}
-
-// Initialise with default SKUs
-function initDefaultSKUs() {
-  addSKU('สินค้าสำเร็จรูป — นำเข้าจากจีน', 'china-shanghai', 60, 160);
-  addSKU('สินค้าสำเร็จรูป — ผลิตในไทย', 'domestic', 30, 140);
-  addSKU('สินค้าสำเร็จรูป — ซัพพลายเออร์ในประเทศ', 'asean', 10, 150);
-}
-
+// --- NAV ---
 function switchTab(name, btn) {
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('.nbtn').forEach(function(b){ b.classList.remove('active'); });
   document.getElementById('tab-'+name).classList.add('active');
-  if(btn) btn.classList.add('active');
+  if (btn) btn.classList.add('active');
+  if (name === 'compare') { buildScCards(); buildScChart(); }
 }
-function init(){buildPillars();buildChecklist();buildScenarioCards();buildScenarioChart();initDefaultSKUs();recalc();startupSequence()}
+
+// --- INIT ---
+function init() {
+  buildPillars();
+  buildCL();
+  buildScCards();
+  buildScChart();
+  onSrcChange();
+  recalc();
+  startupSeq();
+}
 init();
 </script>
 </body>
