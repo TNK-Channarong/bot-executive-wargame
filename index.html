@@ -472,24 +472,25 @@ async function startupSequence(){
 
 // ── AI: CURRENT SITUATION (page load) ─────────────────
 async function runCurrentAnalysis(){
-  const prompt=`You are a business risk analyst for ASEAN supply chains.
-
-VERIFIED DATA mid-March 2026:
-- War started: Feb 28, 2026. Brent pre-war (Feb 27): ~$71/bbl. Brent now: ~$100-104/bbl
-- Strait of Hormuz: closed >70%. All major carriers suspended Gulf bookings.
-- Emergency surcharges: Maersk $200/TEU, Hapag-Lloyd war risk $1500/TEU
-- Container spot rates rising ~10%/week. LNG/LPG supply disrupted.
-- Raw material (petrochemicals, polymers) under supply pressure.
-
-Return ONLY raw JSON (no markdown):
-{
-  "oil":30,"logistics":25,"rawmat":14,"energy":25,"vol":8,"price":8,
-  "current_oil_price":102,
-  "current_logistics_index":"สูงมาก — Emergency Surcharge ทุกสายเรือ",
-  "summary_th":"สรุปสถานการณ์ปัจจุบัน 2-3 ประโยค",
-  "risk_level":"สูง",
-  "data_date":"มีนาคม 2569"
-}`;
+  const prompt = [
+    'You are a business risk analyst for ASEAN supply chains.',
+    '',
+    'VERIFIED DATA mid-March 2026:',
+    '- War started: Feb 28 2026. Brent pre-war (Feb 27): $71/bbl. Brent now: $100-104/bbl',
+    '- Strait of Hormuz: closed, traffic down over 70%. All major carriers suspended Gulf bookings.',
+    '- Emergency surcharges: Maersk $200/TEU, Hapag-Lloyd war risk $1500/TEU',
+    '- Container spot rates rising 10% per week. LNG/LPG supply disrupted.',
+    '- Raw material (petrochemicals, polymers) under supply pressure.',
+    '',
+    'Return ONLY a raw JSON object, no markdown fences, no explanation.',
+    'Use this exact structure:',
+    '{"oil":30,"logistics":25,"rawmat":14,"energy":25,"vol":8,"price":8,',
+    '"current_oil_price":102,',
+    '"current_logistics_index":"สูงมาก Emergency Surcharge ทุกสายเรือ",',
+    '"summary_th":"สรุปสถานการณ์ปัจจุบัน 2-3 ประโยค",',
+    '"risk_level":"สูง",',
+    '"data_date":"มีนาคม 2569"}'
+  ].join('\n');
   try{
     const res=await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',
@@ -526,53 +527,51 @@ async function runBaselineAnalysis(){
   btn.disabled=true; btn.textContent='⏳ กำลังวิเคราะห์...';
 
   const displayDate=new Date(dateVal).toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric'});
-  const prompt=`You are a business risk analyst. The user wants to compare costs on a specific date vs today (mid-March 2026).
+  const baseMarginBaht = (priceVal - costVal).toFixed(1);
+  const baseMarginPctCalc = (((priceVal - costVal) / priceVal) * 100).toFixed(1);
+  const prompt = [
+    'You are a business risk analyst. Compare costs on a specific date vs today (mid-March 2026).',
+    '',
+    'Baseline date: ' + dateVal,
+    'Baseline cost per case: THB ' + costVal,
+    'Baseline selling price per case: THB ' + priceVal,
+    'Baseline margin per case: THB ' + baseMarginBaht + ' (' + baseMarginPctCalc + '%)',
+    '',
+    'TODAY mid-March 2026 known facts:',
+    '- Brent oil: approx $102/bbl (was $71 on Feb 27 2026 pre-war; $76 in Jan 2026; $80 mid-2025)',
+    '- War started Feb 28 2026. Strait of Hormuz closed.',
+    '- Logistics: emergency surcharges $200/TEU from all major carriers',
+    '- Raw materials: petrochemicals/polymers up 12-15%',
+    '- Energy: LNG/LPG up 20-25% in Asia',
+    '',
+    'For baseline date ' + dateVal + ', estimate the global situation.',
+    'Then calculate cost changes from that date to now.',
+    '',
+    'Return ONLY a raw JSON object, no markdown fences, no explanation, no angle brackets.',
+    'Use this exact structure with real numeric values:',
+    '{',
+    '  "baseline_oil_price": 71,',
+    '  "baseline_logistics": "ปกติ ไมมี surcharge พิเศษ",',
+    '  "baseline_rawmat_index": "ปกติ",',
+    '  "baseline_energy_index": "ปกติ",',
+    '  "current_oil_price": 102,',
+    '  "oil_increase_usd": 31,',
+    '  "logistics_increase_thb": 25,',
+    '  "rawmat_increase_pct": 14,',
+    '  "energy_increase_pct": 25,',
+    '  "total_cost_add_thb": 38,',
+    '  "new_total_cost_thb": 198,',
+    '  "new_margin_thb": 2,',
+    '  "new_margin_pct": 1.0,',
+    '  "margin_change_thb": -38,',
+    '  "margin_change_pct": -19.0,',
+    '  "recommended_price_increase_pct": 12,',
+    '  "summary_th": "สรุปสถานการณ์เป็นภาษาไทย 3-4 ประโยค พรอมตัวเลขจริง",',
+    '  "risk_level": "สูง",',
+    '  "vol_decline_pct": 8',
+    '}'
+  ].join('\n');
 
-Baseline date: ${dateVal}
-Baseline cost/case: ฿${costVal}
-Baseline selling price/case: ฿${priceVal}
-Baseline margin/case: ฿${priceVal-costVal} (${(((priceVal-costVal)/priceVal)*100).toFixed(1)}%)
-
-TODAY (mid-March 2026) known facts:
-- Brent oil: ~$102/bbl (was ~$71 on Feb 27, 2026 pre-war; was ~$76 in Jan 2026; was ~$80 in mid-2025)
-- War started Feb 28 2026. Strait of Hormuz closed.
-- Logistics: emergency surcharges ~$200/TEU from all major carriers
-- Raw materials: petrochemicals/polymers up ~12-15%
-- Energy: LNG/LPG up ~20-25% in Asia
-
-For the baseline date ${dateVal}, estimate what the global situation was:
-- What was approximate Brent oil price?
-- What was the logistics environment?
-- What were raw material costs like?
-
-Then calculate:
-- How much has EACH cost component changed from that date to now?
-- What is the estimated TOTAL cost increase per case (฿) from baseline to now?
-- What is the new total cost per case?
-- What is the new margin per case and new margin %?
-
-Return ONLY raw JSON (no markdown, no explanation):
-{
-  "baseline_oil_price": <number, estimated Brent USD/bbl on that date>,
-  "baseline_logistics": "<short Thai description of logistics on that date>",
-  "baseline_rawmat_index": "<short Thai description>",
-  "baseline_energy_index": "<short Thai description>",
-  "current_oil_price": 102,
-  "oil_increase_usd": <current minus baseline oil price>,
-  "logistics_increase_thb": <estimated baht per case increase>,
-  "rawmat_increase_pct": <percentage increase>,
-  "energy_increase_pct": <percentage increase>,
-  "total_cost_add_thb": <total cost increase per case in baht>,
-  "new_total_cost_thb": <baseline cost + total_cost_add>,
-  "new_margin_thb": <new selling price - new total cost, assuming same selling price>,
-  "new_margin_pct": <new margin as % of selling price>,
-  "margin_change_thb": <new_margin - baseline margin>,
-  "margin_change_pct": <new_margin_pct - baseline_margin_pct>,
-  "recommended_price_increase_pct": <% price increase needed to restore original margin>,
-  "summary_th": "<3-4 sentence Thai summary comparing situation on baseline date vs now, with specific numbers>",
-  "risk_level": "<วิกฤต|สูง|ปานกลาง|ต่ำ>",
-  "vol_decline_pct": <estimated volume decline if price increase passed through>
-}`;
 
   let result;
   try{
@@ -608,8 +607,8 @@ Return ONLY raw JSON (no markdown, no explanation):
       margin_change_thb:0, margin_change_pct:0,
       recommended_price_increase_pct: isPreWar?12:7,
       summary_th: isPreWar
-        ?`ณ วันที่ ${displayDate} สถานการณ์โลกยังปกติ น้ำมัน Brent อยู่ที่ประมาณ $71/บาร์เรล และช่องแคบฮอร์มุซยังเปิดอยู่ ต้นทุนโลจิสติกส์อยู่ในระดับปกติ เมื่อเทียบกับปัจจุบัน (มีนาคม 2569) ที่น้ำมันพุ่งเป็น $102/บาร์เรล และช่องแคบฮอร์มุซปิด ส่งผลให้ต้นทุนต่อลังเพิ่มขึ้นอย่างมีนัยสำคัญ`
-        :`ณ วันที่ ${displayDate} สงครามเพิ่งเริ่มต้น ราคาน้ำมันเริ่มผันผวน เมื่อเทียบกับปัจจุบันที่สถานการณ์รุนแรงขึ้นต่อเนื่อง ต้นทุนทุกด้านเพิ่มสูงขึ้น`,
+        ? 'ณ วันที่ ' + displayDate + ' สถานการณ์โลกยังปกติ น้ำมัน Brent อยู่ที่ประมาณ $71/บาร์เรล และช่องแคบฮอร์มุซยังเปิดอยู่ ต้นทุนโลจิสติกส์อยู่ในระดับปกติ เมื่อเทียบกับปัจจุบัน (มีนาคม 2569) ที่น้ำมันพุ่งเป็น $102/บาร์เรล และช่องแคบฮอร์มุซปิด ส่งผลให้ต้นทุนต่อลังเพิ่มขึ้นอย่างมีนัยสำคัญ'
+        : 'ณ วันที่ ' + displayDate + ' สงครามเพิ่งเริ่มต้น ราคาน้ำมันเริ่มผันผวน เมื่อเทียบกับปัจจุบันที่สถานการณ์รุนแรงขึ้นต่อเนื่อง ต้นทุนทุกด้านเพิ่มสูงขึ้น',
       risk_level:'สูง',
       vol_decline_pct:8
     };
@@ -697,24 +696,29 @@ function updateSlidersFromBaseline(r){
 }
 
 function updateAIBanner(r){
-  document.getElementById('ai-summary').textContent=r.summary_th||'';
-  document.getElementById('ai-meta').innerHTML=
-    `⚠️ ระดับความเสี่ยง: <strong style="color:var(--red)">${r.risk_level||'—'}</strong> &nbsp;|&nbsp; 🛢 น้ำมันปัจจุบัน: $${r.current_oil_price}/bbl &nbsp;|&nbsp; 📅 อัปเดต: ${new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})}`;
-  document.getElementById('ai-banner').style.display='flex';
+  const nowTime = new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
+  document.getElementById('ai-summary').textContent = r.summary_th || '';
+  document.getElementById('ai-meta').innerHTML =
+    '<span>⚠️ ระดับความเสี่ยง: <strong style="color:var(--red)">' + (r.risk_level||'—') + '</strong></span>' +
+    ' &nbsp;|&nbsp; 🛢 น้ำมันปัจจุบัน: $' + (r.current_oil_price||102) + '/bbl' +
+    ' &nbsp;|&nbsp; อัปเดต: ' + nowTime;
+  document.getElementById('ai-banner').style.display = 'flex';
 }
 
 function applyCurrentValues(v){
-  document.getElementById('s-oil').value=v.oil||30;
-  document.getElementById('s-logistics').value=v.logistics||25;
-  document.getElementById('s-rawmat').value=v.rawmat||14;
-  document.getElementById('s-energy').value=v.energy||25;
-  document.getElementById('s-vol').value=v.vol||8;
-  document.getElementById('s-price').value=v.price||8;
-  document.getElementById('ai-set-label').textContent='ตั้งค่าโดย AI จากข้อมูลจริง ✅';
+  document.getElementById('s-oil').value = v.oil||30;
+  document.getElementById('s-logistics').value = v.logistics||25;
+  document.getElementById('s-rawmat').value = v.rawmat||14;
+  document.getElementById('s-energy').value = v.energy||25;
+  document.getElementById('s-vol').value = v.vol||8;
+  document.getElementById('s-price').value = v.price||8;
+  document.getElementById('ai-set-label').textContent = 'ตั้งค่าโดย AI จากข้อมูลจริง ✅';
   if(v.summary_th){
-    document.getElementById('ai-summary').textContent=v.summary_th;
-    document.getElementById('ai-meta').innerHTML=`⚠️ ระดับความเสี่ยง: <strong style="color:var(--red)">${v.risk_level||'สูง'}</strong> &nbsp;|&nbsp; 📅 ${v.data_date||'มีนาคม 2569'}`;
-    document.getElementById('ai-banner').style.display='flex';
+    document.getElementById('ai-summary').textContent = v.summary_th;
+    document.getElementById('ai-meta').innerHTML =
+      '<span>⚠️ ระดับความเสี่ยง: <strong style="color:var(--red)">' + (v.risk_level||'สูง') + '</strong></span>' +
+      ' &nbsp;|&nbsp; 📅 ' + (v.data_date||'มีนาคม 2569');
+    document.getElementById('ai-banner').style.display = 'flex';
   }
   recalc();
 }
@@ -776,11 +780,14 @@ function recalc(){
     :marginImpact<-5?'มาร์จินถูกกดดันอย่างมาก — เร่งแผนประสิทธิภาพและ AI เพื่อชดเชยส่วนต่าง'
     :'สถานการณ์อยู่ในระดับที่จัดการได้ หากมีสต็อกสำรองและสัญญาซัพพลายเออร์รองรับ';
 
-  document.getElementById('interpretation').innerHTML=
-    `<strong style="color:var(--accent2)">เปรียบเทียบจาก Baseline (฿${baseCost}/ลัง มาร์จิน ${baseMarginPct.toFixed(1)}%) → ปัจจุบัน:</strong><br>
-    ต้นทุนต่อลังเพิ่มขึ้น <strong style="color:var(--red)">฿${totalAdd.toFixed(1)}</strong> (${((totalAdd/baseCost)*100).toFixed(1)}%) โดยมีสาเหตุหลักจาก${driver} 
-    มาร์จินเปลี่ยนจาก <strong>${baseMarginPct.toFixed(1)}%</strong> เป็น <strong style="color:${marginImpact<-5?'var(--red)':'var(--green)}">${newMarginPct.toFixed(1)}%</strong> (${fmt(marginImpact)}pp)
-    ${priceUp>0?`การปรับราคาขาย ${priceUp}% ช่วยชดเชยต้นทุนได้ประมาณ ${recovery}% `:''}${advice}`;
+  const marginColor = marginImpact < -5 ? 'var(--red)' : 'var(--green)';
+  const priceNote = priceUp > 0 ? 'การปรับราคาขาย ' + priceUp + '% ช่วยชดเชยต้นทุนได้ประมาณ ' + recovery + '% ' : '';
+  const costPct = ((totalAdd / baseCost) * 100).toFixed(1);
+  document.getElementById('interpretation').innerHTML =
+    '<strong style="color:var(--accent2)">เปรียบเทียบจาก Baseline (฿' + baseCost + '/ลัง มาร์จิน ' + baseMarginPct.toFixed(1) + '%) สูปัจจุบัน:</strong><br>' +
+    'ตนทุนตอลังเพิ่มขึ้น <strong style="color:var(--red)">฿' + totalAdd.toFixed(1) + '</strong> (' + costPct + '%) โดยมีสาเหตุหลักจาก' + driver + ' ' +
+    'มาร์จินเปลี่ยนจาก <strong>' + baseMarginPct.toFixed(1) + '%</strong> เปน <strong style="color:' + marginColor + '">' + newMarginPct.toFixed(1) + '%</strong> (' + fmt(marginImpact) + 'pp) ' +
+    priceNote + advice;
 
   updateWaterfall(baseCost,logAdd,rawAdd,enAdd,oilAdd,Math.max(0,newRev-baseCost-totalAdd-baseMarginThb));
 }
