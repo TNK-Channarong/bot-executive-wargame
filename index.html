@@ -247,6 +247,57 @@
       </div>
     </div>
 
+    <!-- COST BASE INPUT -->
+    <div class="card" style="border:1px solid rgba(201,168,76,0.35);background:linear-gradient(135deg,rgba(201,168,76,0.05),rgba(91,145,216,0.05))">
+      <div class="card-title" style="color:var(--accent)">📦 ข้อมูลต้นทุนจริงของบริษัทคุณ — กรอกเพื่อให้การคำนวณแม่นยำ</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;align-items:end">
+
+        <div>
+          <div style="font-size:12px;color:var(--text3);margin-bottom:6px">ต้นทุนต่อลัง <em>ปัจจุบัน</em> (฿)</div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-size:14px;color:var(--text3)">฿</span>
+            <input type="number" id="base-cost" value="160" min="1" step="1"
+              style="flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'Sarabun',sans-serif;font-size:16px;font-weight:600;padding:10px 12px;outline:none;width:100%"
+              oninput="recalc()" placeholder="160">
+          </div>
+          <div style="font-size:11px;color:var(--text3);margin-top:4px">ต้นทุนการผลิต+วัตถุดิบ+โลจิสติกส์รวม</div>
+        </div>
+
+        <div>
+          <div style="font-size:12px;color:var(--text3);margin-bottom:6px">ราคาขายต่อลัง <em>ปัจจุบัน</em> (฿)</div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-size:14px;color:var(--text3)">฿</span>
+            <input type="number" id="base-rev" value="200" min="1" step="1"
+              style="flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:'Sarabun',sans-serif;font-size:16px;font-weight:600;padding:10px 12px;outline:none;width:100%"
+              oninput="recalc()" placeholder="200">
+          </div>
+          <div style="font-size:11px;color:var(--text3);margin-top:4px">ราคาที่ขายให้ลูกค้าปัจจุบัน</div>
+        </div>
+
+        <!-- LIVE SUMMARY BOX -->
+        <div style="background:var(--bg3);border-radius:var(--radius-sm);border:1px solid var(--border);padding:12px 14px">
+          <div style="font-size:11px;color:var(--text3);margin-bottom:8px">มาร์จินปัจจุบัน (Baseline)</div>
+          <div style="display:flex;justify-content:space-between;font-size:13px;padding:3px 0;border-bottom:1px solid var(--border)">
+            <span style="color:var(--text3)">ต้นทุน/ลัง</span>
+            <span style="font-weight:600;color:var(--text)" id="disp-base-cost">฿160</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:13px;padding:3px 0;border-bottom:1px solid var(--border)">
+            <span style="color:var(--text3)">ราคาขาย/ลัง</span>
+            <span style="font-weight:600;color:var(--text)" id="disp-base-rev">฿200</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:13px;padding:3px 0;border-bottom:1px solid var(--border)">
+            <span style="color:var(--text3)">กำไร/ลัง</span>
+            <span style="font-weight:600;color:var(--green)" id="disp-base-profit">฿40</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:13px;padding:4px 0">
+            <span style="color:var(--text3)">มาร์จิน %</span>
+            <span style="font-weight:600;color:var(--accent2)" id="disp-base-margin">20.0%</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
     <div class="card card-accent">
       <div class="card-title" style="display:flex;justify-content:space-between;align-items:center">
         <span>ตัวแปรความเสี่ยง — <span id="ai-set-label" style="color:var(--accent)">ตั้งค่าโดย AI จากข้อมูลจริง</span></span>
@@ -286,6 +337,52 @@
             <input type="range" min="0" max="30" step="1" value="7" id="s-price" oninput="recalc()">
             <span class="slider-val" id="v-price">+7%</span>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RESULTS GRID -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1.25rem">
+
+      <!-- ซ้าย: ต้นทุนใหม่ -->
+      <div class="card" style="margin-bottom:0;border-color:rgba(224,82,82,0.3)">
+        <div class="card-title" style="color:var(--red)">ต้นทุนหลังวิกฤต</div>
+        <div style="display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px solid var(--border)">
+          <span style="color:var(--text3)">ต้นทุนเดิม/ลัง</span>
+          <span style="font-weight:600;color:var(--text)" id="r-base-cost">฿160</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px solid var(--border)">
+          <span style="color:var(--text3)">ต้นทุนเพิ่มขึ้น/ลัง</span>
+          <span style="font-weight:600" id="r-cost-add">—</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:15px;padding:8px 0;border-bottom:1px solid var(--border)">
+          <span style="color:var(--text2);font-weight:600">ต้นทุนใหม่/ลัง</span>
+          <span style="font-weight:700;color:var(--red)" id="r-new-cost">—</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:13px;padding:5px 0">
+          <span style="color:var(--text3)">เพิ่มขึ้น %</span>
+          <span style="font-weight:600" id="r-cost-pct">—</span>
+        </div>
+      </div>
+
+      <!-- ขวา: ราคาขายและมาร์จินใหม่ -->
+      <div class="card" style="margin-bottom:0;border-color:rgba(76,175,126,0.3)">
+        <div class="card-title" style="color:var(--green)">ราคาขาย & มาร์จินใหม่</div>
+        <div style="display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px solid var(--border)">
+          <span style="color:var(--text3)">ราคาขายเดิม/ลัง</span>
+          <span style="font-weight:600;color:var(--text)" id="r-base-rev">฿200</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px solid var(--border)">
+          <span style="color:var(--text3)">ราคาขายใหม่/ลัง</span>
+          <span style="font-weight:600;color:var(--green)" id="r-new-rev">—</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px solid var(--border)">
+          <span style="color:var(--text3)">กำไร/ลัง (ใหม่)</span>
+          <span style="font-weight:600" id="r-new-profit">—</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:13px;padding:5px 0">
+          <span style="color:var(--text3)">มาร์จิน % (เดิม → ใหม่)</span>
+          <span style="font-weight:600" id="r-margin-change">—</span>
         </div>
       </div>
     </div>
@@ -539,56 +636,95 @@ function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 // ── SIMULATOR ─────────────────────────────────────────
 function recalc() {
-  const oil = +document.getElementById('s-oil').value;
-  const logistics = +document.getElementById('s-logistics').value;
-  const rawmat = +document.getElementById('s-rawmat').value;
-  const energy = +document.getElementById('s-energy').value;
-  const vol = +document.getElementById('s-vol').value;
-  const priceUp = +document.getElementById('s-price').value;
+  const oil      = +document.getElementById('s-oil').value;
+  const logistics= +document.getElementById('s-logistics').value;
+  const rawmat   = +document.getElementById('s-rawmat').value;
+  const energy   = +document.getElementById('s-energy').value;
+  const vol      = +document.getElementById('s-vol').value;
+  const priceUp  = +document.getElementById('s-price').value;
 
-  document.getElementById('v-oil').textContent = '+$' + oil;
+  // ── ดึงค่าต้นทุนจริงจากผู้ใช้ ──
+  const baseCost = Math.max(1, +document.getElementById('base-cost').value || 160);
+  const baseRev  = Math.max(baseCost + 1, +document.getElementById('base-rev').value || 200);
+
+  document.getElementById('v-oil').textContent       = '+$' + oil;
   document.getElementById('v-logistics').textContent = '+฿' + logistics;
-  document.getElementById('v-rawmat').textContent = '+' + rawmat + '%';
-  document.getElementById('v-energy').textContent = '+' + energy + '%';
-  document.getElementById('v-vol').textContent = '-' + vol + '%';
-  document.getElementById('v-price').textContent = '+' + priceUp + '%';
+  document.getElementById('v-rawmat').textContent    = '+' + rawmat + '%';
+  document.getElementById('v-energy').textContent    = '+' + energy + '%';
+  document.getElementById('v-vol').textContent       = '-' + vol + '%';
+  document.getElementById('v-price').textContent     = '+' + priceUp + '%';
 
-  const baseRev = 200, baseCost = 160;
-  const baseMargin = (baseRev - baseCost) / baseRev * 100;
-  const logAdd = logistics;
-  const rawAdd = baseCost * 0.4 * rawmat / 100;
-  const enAdd = baseCost * 0.15 * energy / 100;
-  const oilAdd = oil * 0.05;
+  // ── Baseline display ──
+  const baseProfit = baseRev - baseCost;
+  const baseMarginPct = (baseProfit / baseRev * 100);
+  setText('disp-base-cost',   '฿' + baseCost.toLocaleString('th-TH'));
+  setText('disp-base-rev',    '฿' + baseRev.toLocaleString('th-TH'));
+  setText('disp-base-profit', '฿' + baseProfit.toLocaleString('th-TH'));
+  setText('disp-base-margin', baseMarginPct.toFixed(1) + '%');
+
+  // ── คำนวณต้นทุนที่เพิ่มขึ้น ──
+  // โลจิสติกส์: บาทต่อลังตรงๆ
+  const logAdd  = logistics;
+  // วัตถุดิบ: สมมติ 40% ของต้นทุนเป็นวัตถุดิบ
+  const rawAdd  = baseCost * 0.40 * rawmat / 100;
+  // พลังงาน: สมมติ 15% ของต้นทุนเป็นพลังงาน
+  const enAdd   = baseCost * 0.15 * energy / 100;
+  // น้ำมัน: $1 ต่อบาร์เรล ≈ ฿0.05 ต่อลัง (สัดส่วนต้นทุนขนส่งทางอ้อม)
+  const oilAdd  = oil * 0.05;
   const totalAdd = logAdd + rawAdd + enAdd + oilAdd;
-  const newRev = baseRev * (1 + priceUp / 100);
-  const newCost = baseCost + totalAdd;
-  const newMargin = (newRev - newCost) / newRev * 100;
-  const marginImpact = newMargin - baseMargin;
-  const revImpact = ((1 + priceUp / 100) * (1 - vol / 100) - 1) * 100;
-  const breakevenPct = (totalAdd / baseRev) * 100;
 
-  const fmtB = v => (v >= 0 ? '+' : '-') + '฿' + Math.abs(v).toFixed(1);
-  const fmt = (v, d=1) => (v >= 0 ? '+' : '') + v.toFixed(d);
+  const newCost    = baseCost + totalAdd;
+  const newRev     = baseRev * (1 + priceUp / 100);
+  const newProfit  = newRev - newCost;
+  const newMarginPct  = (newProfit / newRev * 100);
+  const marginImpact  = newMarginPct - baseMarginPct;
+  const revImpact     = ((1 + priceUp / 100) * (1 - vol / 100) - 1) * 100;
+  const breakevenPct  = (totalAdd / baseRev) * 100;
+  const costChangePct = (totalAdd / baseCost * 100);
 
-  setMetric('m-costcase', fmtB(totalAdd), totalAdd > 30 ? 'red' : totalAdd > 15 ? 'amber' : 'green');
-  setMetric('m-margin', fmt(marginImpact) + 'pp', marginImpact < -10 ? 'red' : marginImpact < -5 ? 'amber' : 'green');
-  setMetric('m-revenue', fmt(revImpact) + '%', revImpact < -5 ? 'red' : revImpact < 0 ? 'amber' : 'green');
-  setMetric('m-netmargin', newMargin.toFixed(1) + '%', newMargin < 10 ? 'red' : newMargin < 15 ? 'amber' : 'green');
-  setMetric('m-breakeven', breakevenPct.toFixed(1) + '%');
-  const riskTh = marginImpact < -10 ? 'วิกฤต' : marginImpact < -5 ? 'สูง' : marginImpact < -2 ? 'ปานกลาง' : 'ต่ำ';
-  setMetric('m-risk', riskTh, marginImpact < -10 ? 'red' : marginImpact < -5 ? 'amber' : 'green');
+  // ── อัปเดต detail cards ──
+  const fmtB = (v, sign=true) => (sign && v>=0?'+':v<0?'-':'') + '฿' + Math.abs(v).toFixed(1);
+  const fmt  = (v, d=1) => (v>=0?'+':'') + v.toFixed(d);
+  const clr  = (v, rev=false) => rev ? (v>0?'var(--green)':v<0?'var(--red)':'var(--text)') : (v<0?'var(--green)':v>0?'var(--red)':'var(--text)');
 
-  const driver = logAdd > rawAdd && logAdd > enAdd ? 'ต้นทุนโลจิสติกส์' : rawAdd > enAdd ? 'ต้นทุนวัตถุดิบ' : 'ต้นทุนพลังงาน';
-  const recovery = priceUp > 0 ? (priceUp / breakevenPct * 100).toFixed(0) : 0;
-  const advice = revImpact < -5 ? 'ปริมาณขายลดลงมีนัยสำคัญ — ควรพิจารณาการปรับราคาแบบค่อยเป็นค่อยไปเพื่อรักษาส่วนแบ่งตลาด'
-    : marginImpact < -5 ? 'มาร์จินถูกกดดันอย่างมาก — เร่งแผนประสิทธิภาพและ AI เพื่อชดเชยส่วนต่าง'
+  setText('r-base-cost',   '฿' + baseCost.toLocaleString('th-TH'));
+  setText('r-base-rev',    '฿' + baseRev.toLocaleString('th-TH'));
+  setHtml('r-cost-add',    `<span style="color:var(--red)">${fmtB(totalAdd)}</span>`);
+  setHtml('r-new-cost',    `฿${newCost.toFixed(1)}`);
+  setHtml('r-cost-pct',    `<span style="color:var(--red)">+${costChangePct.toFixed(1)}%</span>`);
+  setHtml('r-new-rev',     `฿${newRev.toFixed(1)}`);
+  setHtml('r-new-profit',  `<span style="color:${clr(newProfit,true)}">฿${newProfit.toFixed(1)}</span>`);
+  setHtml('r-margin-change',
+    `<span style="color:var(--text3)">${baseMarginPct.toFixed(1)}%</span> → <span style="color:${marginImpact<0?'var(--red)':'var(--green)'}; font-weight:700">${newMarginPct.toFixed(1)}%</span>`);
+
+  // ── metric cards ──
+  setMetric('m-costcase',  fmtB(totalAdd), totalAdd > baseCost*0.2 ? 'red' : totalAdd > baseCost*0.1 ? 'amber' : 'green');
+  setMetric('m-margin',    fmt(marginImpact)+'pp', marginImpact<-10?'red':marginImpact<-5?'amber':'green');
+  setMetric('m-revenue',   fmt(revImpact)+'%', revImpact<-5?'red':revImpact<0?'amber':'green');
+  setMetric('m-netmargin', newMarginPct.toFixed(1)+'%', newMarginPct<10?'red':newMarginPct<15?'amber':'green');
+  setMetric('m-breakeven', breakevenPct.toFixed(1)+'%');
+  const riskTh = marginImpact<-10?'วิกฤต':marginImpact<-5?'สูง':marginImpact<-2?'ปานกลาง':'ต่ำ';
+  setMetric('m-risk', riskTh, marginImpact<-10?'red':marginImpact<-5?'amber':'green');
+
+  // ── interpretation ──
+  const driver   = logAdd>rawAdd&&logAdd>enAdd ? 'ต้นทุนโลจิสติกส์' : rawAdd>enAdd ? 'ต้นทุนวัตถุดิบ' : 'ต้นทุนพลังงาน';
+  const recovery = priceUp>0 ? (priceUp/breakevenPct*100).toFixed(0) : 0;
+  const advice   = revImpact<-5
+    ? 'ปริมาณขายลดลงมีนัยสำคัญ — ควรพิจารณาการปรับราคาแบบค่อยเป็นค่อยไปเพื่อรักษาส่วนแบ่งตลาด'
+    : marginImpact<-5
+    ? 'มาร์จินถูกกดดันอย่างมาก — เร่งแผนประสิทธิภาพและ AI เพื่อชดเชยส่วนต่าง'
     : 'สถานการณ์อยู่ในระดับที่จัดการได้ หากมีสต็อกสำรองและสัญญาซัพพลายเออร์รองรับ';
   document.getElementById('interpretation').textContent =
-    `ในสถานการณ์นี้ ต้นทุนต่อลังเพิ่มขึ้น ฿${totalAdd.toFixed(1)} โดยมีสาเหตุหลักจาก${driver} ` +
-    (priceUp > 0 ? `การปรับราคาขาย ${priceUp}% ช่วยชดเชยต้นทุนได้ประมาณ ${recovery}% ` : '') + advice;
+    `ต้นทุนต่อลังเพิ่มจาก ฿${baseCost.toLocaleString('th-TH')} → ฿${newCost.toFixed(1)} (+฿${totalAdd.toFixed(1)}) ` +
+    `โดยมีสาเหตุหลักจาก${driver} กำไรต่อลังเปลี่ยนจาก ฿${baseProfit.toFixed(1)} → ฿${newProfit.toFixed(1)} ` +
+    (priceUp>0 ? `การปรับราคาขาย ${priceUp}% ช่วยชดเชยต้นทุนได้ประมาณ ${recovery}% ` : '') + advice;
 
-  updateWaterfall(baseCost, logAdd, rawAdd, enAdd, oilAdd, Math.max(0, newRev - baseCost - totalAdd - (baseRev - baseCost)));
+  updateWaterfall(baseCost, logAdd, rawAdd, enAdd, oilAdd,
+    Math.max(0, newRev - baseCost - totalAdd - (baseRev - baseCost)));
 }
+
+function setText(id, val) { const el=document.getElementById(id); if(el) el.textContent=val; }
+function setHtml(id, val) { const el=document.getElementById(id); if(el) el.innerHTML=val; }
 
 function setMetric(id, val, cls) {
   const el = document.getElementById(id);
@@ -597,7 +733,7 @@ function setMetric(id, val, cls) {
 }
 
 function updateWaterfall(base, log, raw, en, oil, recovery) {
-  const labels = ['ต้นทุนเดิม','โลจิสติกส์+','วัตถุดิบ+','พลังงาน+','น้ำมัน+','ชดเชยราคา','รวม'];
+  const labels = [`ต้นทุนเดิม ฿${base.toLocaleString('th-TH')}`,'โลจิสติกส์+','วัตถุดิบ+','พลังงาน+','น้ำมัน+','ชดเชยราคา',`รวมใหม่`];
   const vals = [base, log, raw, en, oil, recovery, base+log+raw+en+oil-recovery];
   const colors = ['#5b91d8','#e05252','#e05252','#e05252','#e05252','#4caf7e','#5b91d8'];
   if (wChart) wChart.destroy();
